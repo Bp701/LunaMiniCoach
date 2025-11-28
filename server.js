@@ -16,7 +16,7 @@ app.use(express.static(path.join(__dirname, 'Public')));
 
 // --- KONFIGURACJA BAZY DANYCH (SQLite) ---
 // Poprawna ścieżka do pliku bazy danych
-const dbPath = path.join(__dirname, 'luna.db');
+const dbPath = path.join('/tmp', 'luna.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('❌ Błąd otwarcia bazy:', err.message);
