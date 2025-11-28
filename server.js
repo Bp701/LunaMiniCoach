@@ -64,7 +64,7 @@ app.get('/api/user/:id', (req, res) => {
 });
 
 
-// --- 3. ASYNCHRONICZNY WARTOWNIK ---
+// --- ASYNCHRONICZNY WARTOWNIK ---
 // Serwer startuje TYLKO I WYŁĄCZNIE, gdy baza jest gotowa.
 db.serialize(() => {
     // 1. Tworzymy tabelę Users (Gwarancja, że struktura istnieje)
@@ -81,6 +81,6 @@ db.serialize(() => {
     // 2. STARTUJEMY SERWER DOPIERO TUTAJ
     app.listen(PORT, () => {
         console.log(`🚀 Serwer Node.js działa na porcie ${PORT}!`);
-        console.log(`📦 Baza danych podłączona w: ${dbPath}`);
+        console.log(`📦 Baza danych podłączona w: ${dbPath}`); // Ta linia musi być wewnątrz
     });
 });
