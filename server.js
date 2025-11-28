@@ -13,18 +13,18 @@ app.use(bodyParser.json());
 
 // 🚨 KLUCZOWA POPRAWKA 🚨: Obsługa plików statycznych (DUŻE "P" w Public)
 app.use(express.static(path.join(__dirname, 'Public')));
-
-// --- KONFIGURACJA BAZY DANYCH (SQLite) ---
-// Poprawna ścieżka do pliku bazy danych
+// --- NAPRAWA BAZY DANYCH DLA RENDER.COM ---
+// Używamy folderu tymczasowego /tmp, który jest zawsze do zapisu na Renderze!
 const dbPath = path.join('/tmp', 'luna.db');
+
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('❌ Błąd otwarcia bazy:', err.message);
     } else {
+        // Logowanie poprawnej ścieżki (w /tmp)
         console.log(`📦 Baza danych podłączona w: ${dbPath}`);
     }
 });
-
 // Tworzymy tabelę Users
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
