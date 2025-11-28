@@ -19,12 +19,12 @@ const dbPath = path.join('/tmp', 'luna.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('❌ Błąd otwarcia bazy:', err.message);
-        process.exit(1); // Wyłącz aplikację w razie krytycznego błędu
+        process.exit(1);
     }
 });
 
 // --- 2. API (Endpoints) ---
-// Definiujemy endpointy, które będą używać bazy
+// Definiujemy endpointy, aby były gotowe do użycia
 app.post('/api/login', (req, res) => {
     const { name } = req.body;
     db.get("SELECT * FROM users WHERE name = ?", [name], (err, row) => {
@@ -42,6 +42,46 @@ app.post('/api/login', (req, res) => {
                 });
             });
         }
+    });
+});
+
+app.post('/api/save-progress', (req, res) => {
+    const { userId, stars, visual, auditory, tactile, memory } = req.body;
+    const sql = `UPDATE users SET 
+                 stars = ?, visual_score = ?, auditory_score = ?, tactile_score = ?, memory_score = ?
+                 WHERE id = ?`;
+    db.run(sql, [stars, visual, auditory, tactile, memory, userId], function (err) {
+        if (err) return res.status(500).json({ error: "Błąd zapisu postępów." });
+        res.json({ success: true });
+    });
+});
+
+app.get('/api/user/:id', (req, res) => {
+    db.get("SELECT * FROM users WHERE id = ?", [req.params.id], (err, row) => {
+        if (err) return res.status(500).json({ error: "Błąd pobierania danych." });
+        res.json(row);
+    });
+});
+
+
+// --- 3. ASYNCHRONICZNY WARTOWNIK ---
+// Serwer startuje TYLKO I WYŁĄCZNIE, gdy baza jest gotowa.
+db.serialize(() => {
+    // 1. Tworzymy tabelę Users (Gwarancja, że struktura istnieje)
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        stars INTEGER DEFAULT 0,
+        visual_score INTEGER DEFAULT 0,
+        auditory_score INTEGER DEFAULT 0,
+        tactile_score INTEGER DEFAULT 0,
+        memory_score INTEGER DEFAULT 0
+    )`);
+
+    // 2. STARTUJEMY SERWER DOPIERO TUTAJ
+    app.listen(PORT, () => {
+        console.log(`🚀 Serwer Node.js działa na porcie ${PORT}!`);
+        console.log(`📦 Baza danych podłączona w: ${dbPath}`);
     });
 });
 
