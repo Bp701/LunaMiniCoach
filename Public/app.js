@@ -18,7 +18,22 @@ function playTone(freq, type = 'sine', duration = 0.5) {
     gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
     osc.stop(audioCtx.currentTime + duration);
 }
+// --- SYNTEZATOR MOWY (LUNA MÓWI) ---
+function speak(text) {
+    // Jeśli Luna już coś mówi, przerywamy (żeby nie nakładały się głosy)
+    window.speechSynthesis.cancel();
 
+    const msg = new SpeechSynthesisUtterance();
+    msg.text = text;
+    msg.lang = 'pl-PL'; // Język polski
+    msg.pitch = 1.2;    // Wyższy głos (bardziej jak wróżka)
+    msg.rate = 0.9;     // Troszkę wolniej, wyraźniej dla dzieci
+
+    window.speechSynthesis.speak(msg);
+}
+
+// Przykład użycia w grze:
+// speak("Cześć! Znajdź parę, która wydaje taki sam dźwięk!");
 // --- 2. STAN APLIKACJI ---
 const appState = {
     user: null,
@@ -142,23 +157,41 @@ function startExercise(category) {
     // Reset Canvasu przy wejściu (Naprawa błędu rozmiaru 0x0)
     if (category === 'tactile') {
         showScreen('tactile');
+
+        // Luna mówi:
+        speak("Narysuj emocję, którą zobaczysz na ekranie.");
+
         generateEmotionExercise();
         setTimeout(initializeCanvas, 100);
     }
     else if (category === 'memory') {
         showScreen('memory');
+
+        // Luna mówi:
+        speak("Klikaj w karty i znajdź pary, które brzmią tak samo.");
+
         startMemoryGame();
     }
     else if (category === 'visual') {
         showScreen('visual');
+
+        // Luna mówi:
+        speak("Spójrz na duży kolor i znajdź taki sam poniżej.");
+
         generateColorExercise();
     }
     else if (category === 'auditory') {
         showScreen('auditory');
+
+        // Luna mówi:
+        speak("Posłuchaj rytmu, a potem wystukaj go na bębenku.");
+
         generateRhythmExercise();
     }
-}
 
+    // Zapisujemy aktualny ekran w stanie aplikacji
+    appState.currentScreen = category;
+}
 // --- 5. LOGIKA GIER ---
 
 // GRA 1: MEMORY
@@ -394,7 +427,8 @@ function submitDrawing() {
 async function completeExercise(category) {
     playTone(500, 'sine', 0.1);
     setTimeout(() => playTone(800, 'sine', 0.2), 150);
-
+/ NOWOŚĆ: Luna chwali głosem!
+    speak("Wspaniale! Zadanie wykonane, zdobywasz gwiazdki!");
     // Zapisz w bazie
     await saveProgress(category);
 
