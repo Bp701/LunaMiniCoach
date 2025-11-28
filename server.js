@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'Public')));
-
+// Wersja 1.1 - Poprawa Public
 // BAZA DANYCH
 const db = new sqlite3.Database('./luna.db', (err) => {
     if (err) console.error(err.message);
