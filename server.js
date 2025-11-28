@@ -10,10 +10,10 @@ const PORT = process.env.PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-// Obsługa plików statycznych (DUŻE P)
+// Obsługa plików statycznych (DUŻE P, aby pasowało do GitHuba)
 app.use(express.static(path.join(__dirname, 'Public')));
 
-// --- KONFIGURACJA BAZY DANYCH (SQLite) ---
+// --- 1. DEKLARACJA BAZY DANYCH ---
 // Używamy folderu tymczasowego /tmp
 const dbPath = path.join('/tmp', 'luna.db');
 const db = new sqlite3.Database(dbPath, (err) => {
@@ -23,11 +23,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
     }
 });
 
-// --- API (Endpoints) ---
-// Definiujemy endpointy PRZED startem serwera
+// --- 2. API (Endpoints) ---
+// Definiujemy endpointy, które będą używać bazy
 app.post('/api/login', (req, res) => {
     const { name } = req.body;
-    // Sprawdzanie czy użytkownik istnieje
     db.get("SELECT * FROM users WHERE name = ?", [name], (err, row) => {
         if (err) {
             console.error("BŁĄD LOGOWANIA:", err.message);
@@ -36,7 +35,6 @@ app.post('/api/login', (req, res) => {
         if (row) {
             res.json({ message: `Witaj z powrotem, ${name}!`, user: row });
         } else {
-            // Tworzenie nowego użytkownika
             db.run("INSERT INTO users (name, stars) VALUES (?, 0)", [name], function (err) {
                 if (err) return res.status(500).json({ error: "Błąd tworzenia konta." });
                 db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (err, newRow) => {
@@ -66,9 +64,10 @@ app.get('/api/user/:id', (req, res) => {
 });
 
 
-// --- ASYNCHRONICZNY WARTOWNIK ---
+// --- 3. ASYNCHRONICZNY WARTOWNIK ---
+// Serwer startuje TYLKO I WYŁĄCZNIE, gdy baza jest gotowa.
 db.serialize(() => {
-    // 1. Tworzymy tabelę Users (jak w poprzedniej wersji)
+    // 1. Tworzymy tabelę Users (Gwarancja, że struktura istnieje)
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE,
@@ -79,7 +78,7 @@ db.serialize(() => {
         memory_score INTEGER DEFAULT 0
     )`);
 
-    // 2. STARTUJEMY SERWER DOPIERO PO ZBUDOWANIU BAZY!
+    // 2. STARTUJEMY SERWER DOPIERO TUTAJ
     app.listen(PORT, () => {
         console.log(`🚀 Serwer Node.js działa na porcie ${PORT}!`);
         console.log(`📦 Baza danych podłączona w: ${dbPath}`);
