@@ -9,7 +9,37 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
+// Pamiętaj o dużym 'P' w Public!
 app.use(express.static(path.join(__dirname, 'Public')));
+
+// --- NAPRAWA BAZY DANYCH DLA RENDER.COM ---
+// Używamy pełnej ścieżki systemowej, żeby serwer się nie zgubił
+const dbPath = path.resolve(__dirname, 'luna.db');
+
+const db = new sqlite3.Database(dbPath, (err) => {
+    if (err) {
+        console.error('❌ Błąd otwarcia bazy:', err.message);
+    } else {
+        console.log(`📦 Baza danych podłączona w: ${dbPath}`);
+    }
+});
+// ------------------------------------------
+
+// Reszta kodu (tabela users, api login, api save...) zostaje bez zmian!
+// Upewnij się, że masz dalej ten kod:
+db.serialize(() => {
+    db.run(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT UNIQUE,
+        stars INTEGER DEFAULT 0,
+        visual_score INTEGER DEFAULT 0,
+        auditory_score INTEGER DEFAULT 0,
+        tactile_score INTEGER DEFAULT 0,
+        memory_score INTEGER DEFAULT 0
+    )`);
+});
+
+// ... (Dalej Twoje endpointy app.post, app.get itd.) ...
 // Wersja 1.1 - Poprawa Public
 // BAZA DANYCH
 const db = new sqlite3.Database('./luna.db', (err) => {
