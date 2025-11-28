@@ -2,20 +2,21 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('sqlite3').verbose(); // Poprawny require
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001; // Render użyje portu z env, my użyjemy 3001
 
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
-// Pamiętaj o dużym 'P' w Public!
+
+// 🚨 KLUCZOWA POPRAWKA 🚨: Obsługa plików statycznych (DUŻE "P" w Public)
 app.use(express.static(path.join(__dirname, 'Public')));
 
-// --- NAPRAWA BAZY DANYCH DLA RENDER.COM ---
-// Używamy pełnej ścieżki systemowej, żeby serwer się nie zgubił
-const dbPath = path.resolve(__dirname, 'luna.db');
-
+// --- KONFIGURACJA BAZY DANYCH (SQLite) ---
+// Poprawna ścieżka do pliku bazy danych
+const dbPath = path.join(__dirname, 'luna.db');
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('❌ Błąd otwarcia bazy:', err.message);
@@ -23,10 +24,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
         console.log(`📦 Baza danych podłączona w: ${dbPath}`);
     }
 });
-// ------------------------------------------
 
-// Reszta kodu (tabela users, api login, api save...) zostaje bez zmian!
-// Upewnij się, że masz dalej ten kod:
+// Tworzymy tabelę Users
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,44 +38,18 @@ db.serialize(() => {
     )`);
 });
 
-// ... (Dalej Twoje endpointy app.post, app.get itd.) ...
-// Wersja 1.1 - Poprawa Public
-// BAZA DANYCH
-const db = new sqlite3.Database('./luna.db', (err) => {
-    if (err) console.error(err.message);
-    else console.log('📦 Baza danych podłączona.');
-});
-
-// Nowa tabela z kolumną 'name' (unikalną)
-db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE,
-        stars INTEGER DEFAULT 0,
-        visual_score INTEGER DEFAULT 0,
-        auditory_score INTEGER DEFAULT 0,
-        tactile_score INTEGER DEFAULT 0,
-        memory_score INTEGER DEFAULT 0
-    )`);
-});
-
-// --- API ---
+// --- API (Endpoints) ---
 
 // 1. LOGOWANIE / REJESTRACJA
 app.post('/api/login', (req, res) => {
     const { name } = req.body;
-    // Sprawdź czy dziecko istnieje
     db.get("SELECT * FROM users WHERE name = ?", [name], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
-
         if (row) {
-            // Dziecko istnieje - zwracamy jego dane
             res.json({ message: `Witaj z powrotem, ${name}!`, user: row });
         } else {
-            // Nowe dziecko - tworzymy konto
             db.run("INSERT INTO users (name) VALUES (?)", [name], function (err) {
                 if (err) return res.status(500).json({ error: err.message });
-                // Pobieramy nowo utworzone dane
                 db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (err, newRow) => {
                     res.json({ message: `Cześć ${name}, założono nowe konto!`, user: newRow });
                 });
@@ -85,14 +58,12 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-// 2. ZAPIS POSTĘPÓW (Dla konkretnego ID)
+// 2. ZAPIS POSTĘPÓW
 app.post('/api/save-progress', (req, res) => {
     const { userId, stars, visual, auditory, tactile, memory } = req.body;
-
     const sql = `UPDATE users SET 
                  stars = ?, visual_score = ?, auditory_score = ?, tactile_score = ?, memory_score = ?
                  WHERE id = ?`;
-
     db.run(sql, [stars, visual, auditory, tactile, memory, userId], function (err) {
         if (err) return res.status(500).json({ error: err.message });
         res.json({ success: true });
@@ -107,6 +78,8 @@ app.get('/api/user/:id', (req, res) => {
     });
 });
 
+
+// Start serwera
 app.listen(PORT, () => {
-    console.log(`🚀 Serwer działa na http://localhost:${PORT}`);
+    console.log(`🚀 Serwer działa na porcie ${PORT}!`);
 });
