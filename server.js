@@ -5,28 +5,21 @@ const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
-// Ustawiamy port na 3001, chyba że serwer (Render) narzuci inny
 const PORT = process.env.PORT || 3001;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Obsługa plików statycznych (Zwróć uwagę na duże 'P' w Public - tak jak masz na dysku)
+// 🚨 WAŻNE: Tutaj jest "Public" z dużej litery, tak jak Twój folder
 app.use(express.static(path.join(__dirname, 'Public')));
 
-// --- KONFIGURACJA BAZY DANYCH (SQLite) ---
-// Tworzymy plik bazy danych w folderze projektu
+// Baza danych (plik lokalny)
 const dbPath = path.join(__dirname, 'luna.db');
 const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('❌ Błąd otwarcia bazy danych:', err.message);
-    } else {
-        console.log(`📦 Baza danych SQLite podłączona: ${dbPath}`);
-    }
+    if (err) console.error('DB Error:', err.message);
+    else console.log('📦 Baza danych Connected');
 });
 
-// Tworzymy tabelę Users (jeśli nie istnieje)
 db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,53 +32,38 @@ db.serialize(() => {
     )`);
 });
 
-// --- API (Endpoints) ---
-
-// 1. LOGOWANIE / REJESTRACJA
+// API
 app.post('/api/login', (req, res) => {
     const { name } = req.body;
-    if (!name) return res.status(400).json({ error: "Brak imienia" });
-
     db.get("SELECT * FROM users WHERE name = ?", [name], (err, row) => {
         if (err) return res.status(500).json({ error: err.message });
-
         if (row) {
-            res.json({ message: `Witaj ponownie, ${name}!`, user: row });
+            res.json({ message: "Witaj ponownie", user: row });
         } else {
             db.run("INSERT INTO users (name) VALUES (?)", [name], function (err) {
                 if (err) return res.status(500).json({ error: err.message });
-                db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (err, newRow) => {
-                    res.json({ message: `Utworzono profil pacjenta: ${name}`, user: newRow });
-                });
+                db.get("SELECT * FROM users WHERE id = ?", [this.lastID], (e, r) => res.json({ message: "Nowe konto", user: r }));
             });
         }
     });
 });
 
-// 2. ZAPIS WYNIKÓW (HealthTech Data)
 app.post('/api/save-progress', (req, res) => {
     const { userId, stars, visual, auditory, tactile, memory } = req.body;
-
-    const sql = `UPDATE users SET 
-                 stars = ?, visual_score = ?, auditory_score = ?, tactile_score = ?, memory_score = ?
-                 WHERE id = ?`;
-
-    db.run(sql, [stars, visual, auditory, tactile, memory, userId], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true, message: "Dane kliniczne zaktualizowane" });
-    });
+    db.run(`UPDATE users SET stars=?, visual_score=?, auditory_score=?, tactile_score=?, memory_score=? WHERE id=?`,
+        [stars, visual, auditory, tactile, memory, userId],
+        (err) => {
+            if (err) res.status(500).json({ error: err.message });
+            else res.json({ success: true });
+        }
+    );
 });
 
-// 3. POBIERANIE DANYCH PACJENTA
 app.get('/api/user/:id', (req, res) => {
     db.get("SELECT * FROM users WHERE id = ?", [req.params.id], (err, row) => {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json(row);
+        if (err) res.status(500).send(err);
+        else res.json(row);
     });
 });
 
-// Start serwera
-app.listen(PORT, () => {
-    console.log(`\n🚀 Luna System (HealthTech Core) działa na: http://localhost:${PORT}`);
-    console.log(`👉 Baza danych: SQLite (Lokalna)\n`);
-});
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
