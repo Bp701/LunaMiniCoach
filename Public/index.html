@@ -3,346 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luna's MiniCoach - DEMO</title>
+    <title>Luna Health System</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Demo Watermark -->
-    <div class="demo-watermark">DEMO - Luna's MiniCoach</div>
+    <div class="demo-watermark">Luna Tech Innovations v2.1 (Clinical Build)</div>
     
-    <!-- Welcome Screen -->
-   <section class="welcome-screen active" id="welcomeScreen">
+    <section class="welcome-screen active" id="welcomeScreen">
         <div class="container">
             <div class="welcome-content">
-                <div class="luna-character">🧚‍♀️</div>
-                <h1 class="welcome-title">Cześć! Jestem Luna.</h1>
-                <p class="welcome-description">Jak masz na imię?</p>
+                <div class="luna-logo">🧸⚡</div>
+                <h1 class="welcome-title">Luna Mini Coach</h1>
+                <p class="welcome-subtitle">Inteligentny System Wsparcia Rozwoju Sensorycznego</p>
                 
-                <div class="login-area" style="margin-bottom: 20px;">
-                    <input type="text" id="usernameInput" class="form-control" placeholder="Wpisz imię..." style="max-width: 300px; margin: 0 auto; text-align: center; font-size: 1.2rem;">
+                <div class="value-proposition">
+                    <div class="value-item">
+                        <span class="icon">❤️</span>
+                        <span class="text">Monitoring HRV</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="icon">🧠</span>
+                        <span class="text">AI Neuro-Analiza</span>
+                    </div>
+                    <div class="value-item">
+                        <span class="icon">📊</span>
+                        <span class="text">Raporty Kliniczne</span>
+                    </div>
                 </div>
 
-                <button class="btn btn--primary btn--large" id="loginButton">ZACZYNAJMY!</button>
+                <div class="login-area">
+                    <input type="text" id="usernameInput" class="form-control" placeholder="ID Pacjenta / Imię">
+                </div>
+
+                <button class="btn btn--primary btn--large" id="loginButton">URUCHOM DIAGNOSTYKĘ</button>
+                
+                <p class="demo-info">System połączony z chmurą Luna Cloud ☁️</p>
             </div>
         </div>
     </section>
 
-    <!-- Exercise Selection Screen -->
     <section class="exercise-selection hidden" id="exerciseSelection">
         <div class="container">
             <div class="header">
-                <div class="luna-small">🧚‍♀️</div>
-                <h2>Wybierz ćwiczenie, które chcesz dziś wykonać!</h2>
-                <div class="progress-info">
-                    <span class="progress-text">Twoje gwiazdy: <span id="starCount">0</span> ⭐</span>
-                </div>
+                <h2>Panel Terapeutyczny</h2>
+                <p>Wybierz moduł stymulacji:</p>
             </div>
-            <div class="exercise-card" data-category="memory">
-                    <div class="card-icon">👂❓</div>
-                    <h3>MEMORY DŹWIĘKOWE</h3>
-                    <p>Znajdź pary, które brzmią tak samo!</p>
-                    <div class="difficulty-indicator">
-                        <span class="level active">Średni</span>
-                    </div>
-                </div>
+            
             <div class="exercise-categories">
                 <div class="exercise-card" data-category="visual">
-                    <div class="card-icon">🎨</div>
-                    <h3>KOLORY I KSZTAŁTY</h3>
-                    <p>Ćwiczenia wzroku i rozpoznawania</p>
-                    <div class="difficulty-indicator">
-                        <span class="level easy active" data-level="easy">Łatwy</span>
-                        <span class="level medium" data-level="medium">Średni</span>
-                        <span class="level hard" data-level="hard">Trudny</span>
-                    </div>
+                    <div class="card-icon">👁️</div>
+                    <h3>STYMULACJA WZROKU</h3>
+                    <p>Trening koncentracji i percepcji</p>
                 </div>
                 
                 <div class="exercise-card" data-category="auditory">
-                    <div class="card-icon">🔔</div>
-                    <h3>DŹWIĘKI I RYTMY</h3>
-                    <p>Ćwiczenia słuchu i rytmu</p>
-                    <div class="difficulty-indicator">
-                        <span class="level easy active" data-level="easy">Łatwy</span>
-                        <span class="level medium" data-level="medium">Średni</span>
-                        <span class="level hard" data-level="hard">Trudny</span>
-                    </div>
+                    <div class="card-icon">👂</div>
+                    <h3>PRZETWARZANIE SŁUCHOWE</h3>
+                    <p>Sekwencje rytmiczne i pamięć</p>
                 </div>
                 
                 <div class="exercise-card" data-category="tactile">
                     <div class="card-icon">✋</div>
-                    <h3>DOTYK I RUCH</h3>
-                    <p>Ćwiczenia dotyku i ruchu</p>
-                    <div class="difficulty-indicator">
-                        <span class="level easy active" data-level="easy">Łatwy</span>
-                        <span class="level medium" data-level="medium">Średni</span>
-                        <span class="level hard" data-level="hard">Trudny</span>
-                    </div>
+                    <h3>MOTORYKA MAŁA</h3>
+                    <p>Koordynacja ręka-oko i ekspresja</p>
+                </div>
+
+                <div class="exercise-card" data-category="memory">
+                    <div class="card-icon">🧠</div>
+                    <h3>PAMIĘĆ OPERACYJNA</h3>
+                    <p>Trening asocjacji dźwiękowych</p>
                 </div>
             </div>
             
             <div class="bottom-nav">
-                <button class="btn btn--outline" id="parentDashboardBtn">Panel dla rodziców</button>
-                <button class="btn btn--secondary" id="backToWelcomeBtn">Powrót</button>
+                <button class="btn btn--outline" id="parentDashboardBtn">Panel Analityczny (Dane)</button>
             </div>
         </div>
     </section>
 
-    <!-- Visual Exercise Screen -->
-    <section class="exercise-screen hidden" id="visualExercise">
+    <section class="exercise-screen hidden" id="visualExercise"><div class="container" id="visualContainer"></div></section>
+    <section class="exercise-screen hidden" id="auditoryExercise"><div class="container" id="auditoryContainer"></div></section>
+    <section class="exercise-screen hidden" id="tactileExercise">
         <div class="container">
-            <div class="exercise-header">
-                <div class="luna-small">🧚‍♀️</div>
-                <h2>Znajdź taki sam kolor!</h2>
-                <div class="exercise-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="visualProgress"></div>
-                    </div>
-                    <span>Postęp: <span id="visualProgressText">0/3</span></span>
-                </div>
+            <div class="game-area"><canvas id="drawingCanvas"></canvas></div>
+            <div class="drawing-tools">
+                <button class="btn btn--outline" id="clearCanvasBtn">Reset Pola</button>
+                <button class="btn btn--primary" id="submitDrawingBtn">Zapisz Wynik</button>
             </div>
-            
-            <div class="game-area">
-                <div class="target-area">
-                    <p>Luna pokazuje:</p>
-                    <div class="target-color" id="targetColor"></div>
-                </div>
-                
-                <div class="choices-area">
-                    <p>Znajdź taki sam:</p>
-                    <div class="color-choices" id="colorChoices"></div>
-                </div>
-            </div>
-            
-            <div class="feedback-area" id="visualFeedback"></div>
-            
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn1">Powrót</button>
-                <button class="btn btn--primary hidden" id="nextVisualBtn">Następne ćwiczenie</button>
-            </div>
+            <button class="btn btn--secondary" id="backToSelectionBtn3">Powrót</button>
         </div>
     </section>
+    <section class="exercise-screen hidden" id="memoryExercise"><div class="container"><div class="memory-grid" id="memoryGrid"></div></div></section>
 
-    <!-- Auditory Exercise Screen -->
-    <section class="exercise-screen hidden" id="auditoryExercise">
-        <div class="container">
-            <div class="exercise-header">
-                <div class="luna-small">🧚‍♀️</div>
-                <h2>Powtórz rytm!</h2>
-                <div class="exercise-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="auditoryProgress"></div>
-                    </div>
-                    <span>Postęp: <span id="auditoryProgressText">0/3</span></span>
-                </div>
-            </div>
-            
-            <div class="game-area">
-                <div class="rhythm-display">
-                    <p>Luna gra rytm:</p>
-                    <div class="rhythm-pattern" id="rhythmPattern"></div>
-                    <button class="btn btn--primary" id="playRhythmBtn">▶️ Posłuchaj</button>
-                </div>
-                
-               <div class="rhythm-input">
-    <p>Teraz Ty powtórz:</p>
-    <div class="drum-container" style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-        <div class="drum-pad" id="drumPad">🥁</div>
-        <button class="btn btn--outline btn--sm" id="resetRhythmBtn" style="height: 40px;">↺ Pomyłka</button>
-    </div>
-    <div class="user-pattern" id="userPattern"></div>
-</div>
-            </div>
-            
-            <div class="feedback-area" id="auditoryFeedback"></div>
-            
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn2">Powrót</button>
-                <button class="btn btn--primary" id="checkRhythmBtn">Sprawdź rytm</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tactile Exercise Screen -->
-   <section class="exercise-screen hidden" id="tactileExercise">
-        <div class="container">
-            <div class="exercise-header">
-                <div class="luna-small">🧚‍♀️</div>
-                <h2>Narysuj emocję!</h2>
-                <div class="exercise-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="tactileProgress"></div>
-                    </div>
-                    <span>Postęp: <span id="tactileProgressText">0/3</span></span>
-                </div>
-            </div>
-            
-            <div class="game-area">
-                <div class="emotion-prompt">
-                    <p>Jak rysuje się <span id="emotionPrompt">radość</span>?</p>
-                    <div class="emotion-hint">💡 Wskazówka: używaj kolorów i kształtów!</div>
-                </div>
-                
-                <div class="drawing-area">
-                    <canvas id="drawingCanvas" width="400" height="300"></canvas>
-                    <div class="drawing-tools">
-                        <div class="color-palette">
-                            <div class="color-dot active" data-color="#FF6B6B" style="background: #FF6B6B;"></div>
-                            <div class="color-dot" data-color="#4ECDC4" style="background: #4ECDC4;"></div>
-                            <div class="color-dot" data-color="#45B7D1" style="background: #45B7D1;"></div>
-                            <div class="color-dot" data-color="#FFA07A" style="background: #FFA07A;"></div>
-                            <div class="color-dot" data-color="#98D8C8" style="background: #98D8C8;"></div>
-                            <div class="color-dot" data-color="#F7DC6F" style="background: #F7DC6F;"></div>
-                        </div>
-                        <button class="btn btn--outline btn--sm" id="clearCanvasBtn">Wyczyść</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="feedback-area" id="tactileFeedback"></div>
-            
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn3">Powrót</button>
-                <button class="btn btn--primary" id="submitDrawingBtn">Gotowe!</button>
-            </div>
-        </div>
-    </section> <section class="exercise-screen hidden" id="memoryExercise">
-        <div class="container">
-            <div class="exercise-header">
-                <div class="luna-small">🧚‍♀️</div>
-                <h2>Znajdź pary dźwiękowe!</h2>
-                <div class="exercise-progress">
-                    <span>Znalezione pary: <span id="memoryPairsFound">0</span>/4</span>
-                </div>
-            </div>
-            
-            <div class="game-area">
-                <div class="memory-grid" id="memoryGrid"></div>
-            </div>
-            
-            <div class="feedback-area" id="memoryFeedback"></div>
-            
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn4">Powrót</button>
-            </div>
-        </div>
-    </section>
-            <div class="game-area">
-                <div class="emotion-prompt">
-                    <p>Jak rysuje się <span id="emotionPrompt">radość</span>?</p>
-                    <div class="emotion-hint">💡 Wskazówka: używaj kolorów i kształtów!</div>
-                </div>
-                
-                <div class="drawing-area">
-                    <canvas id="drawingCanvas" width="400" height="300"></canvas>
-                    <div class="drawing-tools">
-                        <div class="color-palette">
-                            <div class="color-dot" data-color="#FF6B6B" style="background: #FF6B6B;"></div>
-                            <div class="color-dot" data-color="#4ECDC4" style="background: #4ECDC4;"></div>
-                            <div class="color-dot" data-color="#45B7D1" style="background: #45B7D1;"></div>
-                            <div class="color-dot" data-color="#FFA07A" style="background: #FFA07A;"></div>
-                            <div class="color-dot" data-color="#98D8C8" style="background: #98D8C8;"></div>
-                            <div class="color-dot" data-color="#F7DC6F" style="background: #F7DC6F;"></div>
-                        </div>
-                        <button class="btn btn--outline btn--sm" id="clearCanvasBtn">Wyczyść</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="feedback-area" id="tactileFeedback"></div>
-            
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn3">Powrót</button>
-                <button class="btn btn--primary" id="submitDrawingBtn">Gotowe!</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Parent Dashboard -->
     <section class="parent-dashboard hidden" id="parentDashboard">
         <div class="container">
-            <div class="dashboard-header">
-                <h2>Panel dla Rodziców / Terapeutów</h2>
-                <p class="demo-note">To jest demo - dane są symulowane</p>
+            <h2>Raport Postępów Klinicznych</h2>
+            <div class="chart-container" style="position: relative; height: 300px; width:100%; background:white; padding:20px; border-radius:15px;">
+                <canvas id="progressChart"></canvas>
             </div>
-            
-            <div class="dashboard-content">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number">15</div>
-                        <div class="stat-label">Ukończone ćwiczenia</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">73%</div>
-                        <div class="stat-label">Ogólny postęp</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number">45</div>
-                        <div class="stat-label">Minut ćwiczeń</div>
-                    </div>
-                </div>
-                
-                <div class="progress-chart">
-                    <h3>Postęp w kategoriach</h3>
-                    <div class="chart-container" style="position: relative; height: 300px;">
-                        <canvas id="progressChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="difficulty-controls">
-                    <h3>Ustawienia trudności</h3>
-                    <div class="controls-grid">
-                        <div class="control-item">
-                            <label>Kolory i kształty:</label>
-                            <select class="form-control">
-                                <option>Łatwy</option>
-                                <option selected>Średni</option>
-                                <option>Trudny</option>
-                            </select>
-                        </div>
-                        <div class="control-item">
-                            <label>Dźwięki i rytmy:</label>
-                            <select class="form-control">
-                                <option selected>Łatwy</option>
-                                <option>Średni</option>
-                                <option>Trudny</option>
-                            </select>
-                        </div>
-                        <div class="control-item">
-                            <label>Dotyk i ruch:</label>
-                            <select class="form-control">
-                                <option>Łatwy</option>
-                                <option>Średni</option>
-                                <option selected>Trudny</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="export-section">
-                    <h3>Raporty</h3>
-                    <button class="btn btn--primary">📊 Eksport raportu (PDF)</button>
-                    <button class="btn btn--outline">📧 Wyślij do terapeuty</button>
-                </div>
-            </div>
-            
-            <div class="dashboard-nav">
-                <button class="btn btn--secondary" id="backToDashboardBtn">Powrót do ćwiczeń</button>
-            </div>
+            <button class="btn btn--secondary" id="backToDashboardBtn" style="margin-top:20px;">Powrót</button>
         </div>
     </section>
 
-    <!-- Success Modal -->
     <div class="modal hidden" id="successModal">
-        <div class="modal-overlay"></div>
         <div class="modal-content">
-            <div class="success-animation">🎉</div>
-            <h3 id="successTitle">Świetnie!</h3>
-            <p id="successMessage">Ukończyłeś ćwiczenie!</p>
-            <div class="reward-stars">
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-                <span class="star">⭐</span>
-            </div>
+            <h3>Sesja Zakończona</h3>
+            <p id="successMessage">Dane zapisane w systemie.</p>
             <button class="btn btn--primary" id="continueBtn">Kontynuuj</button>
         </div>
     </div>
