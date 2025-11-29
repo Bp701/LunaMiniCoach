@@ -3,81 +3,126 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("🚀 System Luna HealthTech: GOTOWY");
     setupUI();
-    // Inicjalizacja sensorów (opcjonalna na desktopie)
-    try {
-        const lunaSensors = new LunaSensorSystem();
-        lunaSensors.init();
-    } catch (e) {
-        console.log("Info: Sensory niedostępne na tym urządzeniu.");
+    // === LUNA AI SENSOR SYSTEM (IoT CORE) - WERSJA SKALIBROWANA === //
+    class LunaSensorSystem {
+        constructor() {
+            // ZWIĘKSZONO PRÓG Z 15 NA 45 (Żeby nie włączało się samo)
+            this.shakeThreshold = 45;
+            this.lastShake = 0;
+            console.log('🧠 Luna AI Sensor System: SKALIBROWANY');
+        }
+
+        initSensors() {
+            if (window.DeviceMotionEvent) {
+                window.addEventListener('devicemotion', (e) => {
+                    const acc = e.accelerationIncludingGravity;
+                    if (!acc) return;
+
+                    const intensity = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+
+                    // Wykrycie interakcji (teraz wymaga silniejszego ruchu)
+                    if (intensity > this.shakeThreshold) {
+                        const now = Date.now();
+                        // Blokada czasowa (nie częściej niż raz na 5 sekund)
+                        if (now - this.lastShake > 5000) {
+                            this.lastShake = now;
+                            this.onSensorTrigger('shake');
+                        }
+                    }
+                });
+            }
+        }
+
+        onSensorTrigger(type) {
+            if (type === 'shake') {
+                console.log('🎯 Luna AI: Wykryto interwencję ruchową');
+                this.triggerCalmEffect();
+            }
+        }
+
+        triggerCalmEffect() {
+            // 1. Dźwięk (opcjonalnie, cichy)
+            if (typeof playTone === 'function') playTone(300, 'sine', 0.5);
+
+            // 2. Efekt wizualny (NIEINWAZYJNY)
+            const effect = document.createElement('div');
+            // Zmiana: pointer-events: none sprawia, że można klikać PRZEZ ten napis
+            effect.style.cssText = `
+            position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+            background: rgba(76, 175, 80, 0.9); 
+            padding: 15px 25px; border-radius: 30px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            font-size: 1.2rem; color: white; font-weight: bold; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 9999; animation: fadeOut 3s forwards; 
+            pointer-events: none; /* KLUCZOWE: POZWALA KLIKAĆ POD SPODEM */
+        `;
+            effect.innerHTML = "🧸 WSPARCIE EMOCJONALNE";
+            document.body.appendChild(effect);
+
+            setTimeout(() => effect.remove(), 3000);
+        }
     }
+
+    // Start systemu AI
+    const lunaAI = new LunaSensorSystem();
+    document.addEventListener('DOMContentLoaded', () => {
+        lunaAI.initSensors();
+    });
+
+    console.log(`Logowanie jako: ${name}...`);
+
+    // Zmieniamy tekst na przycisku, żeby widać było, że coś się dzieje
+    const originalText = loginBtn.textContent;
+    loginBtn.textContent = "Łączenie z bazą...";
+    loginBtn.disabled = true;
+
+    try {
+        // Próba logowania do serwera
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("✅ Zalogowano:", data);
+            // Zapisujemy usera w pamięci
+            appState.user = data.user;
+        } else {
+            console.warn("⚠️ Serwer zwrócił błąd, uruchamiam tryb offline.");
+        }
+    } catch (error) {
+        console.error("⚠️ Brak połączenia z serwerem. Tryb DEMO.", error);
+    }
+
+    // NIEZALEŻNIE OD WYNIKU -> PRZECHODZIMY DALEJ (Żebyś nie utknął!)
+    setTimeout(() => {
+        showScreen('exerciseSelection');
+    }, 500);
+});
+    } else {
+    console.error("❌ BŁĄD KRYTYCZNY: Nie znaleziono przycisku loginButton w HTML!");
+}
+
+// 2. Obsługa Nawigacji
+document.querySelectorAll('.exercise-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const cat = card.dataset.category;
+        console.log("Wybrano moduł:", cat);
+        startModule(cat);
+    });
 });
 
-function setupUI() {
-    // 1. Obsługa Przycisku Logowania
-    const loginBtn = document.getElementById('loginButton');
-    const nameInput = document.getElementById('usernameInput');
+document.getElementById('parentDashboardBtn')?.addEventListener('click', loadClinicalDashboard);
 
-    if (loginBtn && nameInput) {
-        loginBtn.addEventListener('click', async () => {
-            const name = nameInput.value.trim();
-            if (!name) {
-                alert("Proszę wpisać imię pacjenta lub ID.");
-                return;
-            }
-
-            console.log(`Logowanie jako: ${name}...`);
-
-            // Zmieniamy tekst na przycisku, żeby widać było, że coś się dzieje
-            const originalText = loginBtn.textContent;
-            loginBtn.textContent = "Łączenie z bazą...";
-            loginBtn.disabled = true;
-
-            try {
-                // Próba logowania do serwera
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log("✅ Zalogowano:", data);
-                    // Zapisujemy usera w pamięci
-                    appState.user = data.user;
-                } else {
-                    console.warn("⚠️ Serwer zwrócił błąd, uruchamiam tryb offline.");
-                }
-            } catch (error) {
-                console.error("⚠️ Brak połączenia z serwerem. Tryb DEMO.", error);
-            }
-
-            // NIEZALEŻNIE OD WYNIKU -> PRZECHODZIMY DALEJ (Żebyś nie utknął!)
-            setTimeout(() => {
-                showScreen('exerciseSelection');
-            }, 500);
-        });
-    } else {
-        console.error("❌ BŁĄD KRYTYCZNY: Nie znaleziono przycisku loginButton w HTML!");
+// Przyciski powrotu (szukamy wszystkich guzików z 'Powrót' w nazwie lub ID)
+document.querySelectorAll('button').forEach(btn => {
+    if (btn.id.includes('backTo')) {
+        btn.addEventListener('click', () => showScreen('exerciseSelection'));
     }
-
-    // 2. Obsługa Nawigacji
-    document.querySelectorAll('.exercise-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const cat = card.dataset.category;
-            console.log("Wybrano moduł:", cat);
-            startModule(cat);
-        });
-    });
-
-    document.getElementById('parentDashboardBtn')?.addEventListener('click', loadClinicalDashboard);
-
-    // Przyciski powrotu (szukamy wszystkich guzików z 'Powrót' w nazwie lub ID)
-    document.querySelectorAll('button').forEach(btn => {
-        if (btn.id.includes('backTo')) {
-            btn.addEventListener('click', () => showScreen('exerciseSelection'));
-        }
-    });
+});
 }
 
 // --- LOGIKA EKRANÓW ---
