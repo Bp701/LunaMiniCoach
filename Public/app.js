@@ -1,9 +1,9 @@
 // ==========================================
-// LUNA MINI COACH - SYSTEM HEALTH-TECH v3.0 (COMPLETE)
-// (Rozszerzone Gry + Puls Dnia + Głos + PDF)
+// LUNA MINI COACH - SYSTEM HEALTH-TECH v3.1 (FINAL POLISH)
+// (Poprawiona Nawigacja + Ciepły Głos + Loop Zadań)
 // ==========================================
 
-// --- 1. LUNA AI SENSOR SYSTEM (IoT CORE) ---
+// --- 1. LUNA AI SENSOR SYSTEM ---
 class LunaSensorSystem {
     constructor() {
         this.shakeThreshold = 45;
@@ -29,13 +29,12 @@ class LunaSensorSystem {
     }
 
     onSensorTrigger() {
-        console.log('🎯 Luna AI: Wykryto interwencję ruchową');
         this.triggerCalmEffect();
     }
 
     triggerCalmEffect() {
         if (typeof playTone === 'function') playTone(300, 'sine', 0.5);
-        speakLuna("Spokojnie. Jestem tutaj."); // Głos przy potrząśnięciu
+        speakLuna("Spokojnie. Jestem tutaj.");
 
         const effect = document.createElement('div');
         effect.style.cssText = `
@@ -52,7 +51,7 @@ class LunaSensorSystem {
     }
 }
 
-// --- 2. SYNTEZATOR DŹWIĘKU ---
+// --- 2. AUDIO & VOICE (WARM & FEMININE) ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playTone(freq, type = 'sine', duration = 0.5) {
@@ -68,27 +67,35 @@ function playTone(freq, type = 'sine', duration = 0.5) {
     osc.stop(audioCtx.currentTime + duration);
 }
 
-// --- 3. GŁOS LUNY (TTS) ---
 function speakLuna(text) {
     if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // Przerwij poprzednie mówienie
+
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();
-    const femaleVoice = voices.find(v => v.lang.includes('pl') && (v.name.includes('Paulina') || v.name.includes('Zosia') || v.name.includes('Maja') || v.name.includes('Google')));
-    if (femaleVoice) utterance.voice = femaleVoice;
-    utterance.rate = 0.9;
-    utterance.pitch = 1.1;
+
+    // Priorytetyzacja ciepłych głosów (Windows: Paulina, Mobile: Zosia/Maja/Google)
+    let selectedVoice = voices.find(v => v.name.includes('Paulina') && v.lang.includes('pl')); // Najlepsza na Windows
+    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl') && (v.name.includes('Zosia') || v.name.includes('Maja')));
+    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl') && v.name.includes('Google')); // Android
+    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl')); // Fallback
+
+    if (selectedVoice) utterance.voice = selectedVoice;
+
+    // Parametry "Ciepłego Głosu"
+    utterance.rate = 0.85;  // Wolniej, bardziej kojąco
+    utterance.pitch = 1.05; // Minimalnie wyżej, ale bez piskliwości
+    utterance.volume = 1.0;
+
     window.speechSynthesis.speak(utterance);
 }
 
-// --- 4. STAN APLIKACJI ---
+// --- 3. STAN APLIKACJI ---
 const appState = {
     user: null,
     currentScreen: 'welcome',
+    activeCategory: null, // Zapamiętuje w co gramy, żeby nie wyrzucać do menu
     exerciseData: {
-        visual: { currentExercise: 0 },
-        auditory: { currentExercise: 0, currentPattern: [], userPattern: [] },
-        tactile: { currentExercise: 0 },
         memory: { pairsFound: 0, firstCard: null, lockBoard: false }
     }
 };
@@ -97,14 +104,17 @@ const lunaAI = new LunaSensorSystem();
 
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
-    initPulseSystem(); // Inicjalizacja Pulsu
+    initPulseSystem();
     lunaAI.initSensors();
     showScreen('welcome');
+    // Ładowanie głosów w tle (fix dla Chrome)
+    window.speechSynthesis.getVoices();
 });
 
 function setupEventListeners() {
     document.getElementById('loginButton').addEventListener('click', handleLogin);
 
+    // Wybór ćwiczenia
     document.querySelectorAll('.exercise-card').forEach(card => {
         card.addEventListener('click', (e) => {
             const category = e.currentTarget.dataset.category;
@@ -112,6 +122,7 @@ function setupEventListeners() {
         });
     });
 
+    // Nawigacja powrotu
     document.getElementById('parentDashboardBtn')?.addEventListener('click', loadDashboardData);
     document.getElementById('backToDashboardBtn')?.addEventListener('click', () => showScreen('exerciseSelection'));
 
@@ -120,6 +131,7 @@ function setupEventListeners() {
         if (btn) btn.addEventListener('click', () => showScreen('exerciseSelection'));
     });
 
+    // Kontrolki gier
     document.getElementById('nextVisualBtn')?.addEventListener('click', generateColorExercise);
     document.getElementById('playRhythmBtn')?.addEventListener('click', playRhythm);
     document.getElementById('drumPad')?.addEventListener('click', addBeat);
@@ -128,13 +140,36 @@ function setupEventListeners() {
     document.getElementById('submitDrawingBtn')?.addEventListener('click', submitDrawing);
     document.getElementById('clearCanvasBtn')?.addEventListener('click', clearCanvas);
 
+    // --- KLUCZOWA ZMIANA: PRZYCISK KONTYNUUJ ---
     document.getElementById('continueBtn')?.addEventListener('click', () => {
         document.getElementById('successModal').classList.add('hidden');
-        showScreen('exerciseSelection');
+
+        // Zamiast wracać do menu, restartujemy grę w tej samej kategorii
+        if (appState.activeCategory === 'visual') {
+            generateColorExercise();
+            speakLuna("Kolejny kolor.");
+        }
+        else if (appState.activeCategory === 'auditory') {
+            generateRhythmExercise();
+            speakLuna("Spróbuj kolejny rytm.");
+        }
+        else if (appState.activeCategory === 'tactile') {
+            generateEmotionExercise();
+            clearCanvas();
+            speakLuna("Narysuj kolejną emocję.");
+        }
+        else if (appState.activeCategory === 'memory') {
+            startMemoryGame();
+            speakLuna("Znajdź pary.");
+        }
+        else {
+            // Dla Pulsu Dnia wracamy do menu
+            showScreen('exerciseSelection');
+        }
     });
 }
 
-// --- 5. LOGIKA LOGOWANIA ---
+// --- 4. LOGOWANIE ---
 async function handleLogin() {
     const nameInput = document.getElementById('usernameInput');
     const name = nameInput && nameInput.value.trim() !== "" ? nameInput.value.trim() : "Gość";
@@ -149,7 +184,7 @@ async function handleLogin() {
         appState.user = data.user;
         document.getElementById('starCount').textContent = appState.user.stars;
 
-        speakLuna(`Witaj ${name}. Gotowy na zabawę?`);
+        speakLuna(`Cześć ${name}. Fajnie, że jesteś.`);
         showScreen('exerciseSelection');
     } catch (e) {
         alert("Tryb Offline.");
@@ -180,39 +215,39 @@ function showScreen(screenName) {
 }
 
 function startExercise(category) {
+    appState.activeCategory = category; // Zapamiętujemy kategorię!
+
     if (category === 'tactile') {
         showScreen('tactile');
-        speakLuna("Narysuj emocję.");
+        speakLuna("Poczuj i narysuj emocję.");
         generateEmotionExercise();
         setTimeout(initializeCanvas, 100);
     }
     else if (category === 'memory') {
         showScreen('memory');
-        speakLuna("Znajdź pary dźwięków.");
+        speakLuna("Znajdź pary takich samych dźwięków.");
         startMemoryGame();
     }
     else if (category === 'visual') {
         showScreen('visual');
-        speakLuna("Znajdź pasujący kolor.");
+        speakLuna("Znajdź taki sam kolor.");
         generateColorExercise();
     }
     else if (category === 'auditory') {
         showScreen('auditory');
-        speakLuna("Powtórz rytm.");
+        speakLuna("Posłuchaj i powtórz rytm.");
         generateRhythmExercise();
     }
 }
 
-// --- 6. GRY (ROZSZERZONE - TWOJA WERSJA V2.2) ---
+// --- 5. LOGIKA GIER ---
 
-// Memory - 8 Dźwięków
+// Memory
 function startMemoryGame() {
     const grid = document.getElementById('memoryGrid');
     if (!grid) return;
     grid.innerHTML = '';
-    appState.exerciseData.memory.pairsFound = 0;
-    appState.exerciseData.memory.firstCard = null;
-    appState.exerciseData.memory.lockBoard = false;
+    appState.exerciseData.memory = { pairsFound: 0, firstCard: null, lockBoard: false };
     document.getElementById('memoryPairsFound').textContent = "0";
 
     const tones = [
@@ -258,11 +293,10 @@ function startMemoryGame() {
     });
 }
 
-// Kolory - 12 Kolorów
+// Kolory
 const colors = [
-    '#FF6B6B', '#FF8E8E', '#4ECDC4', '#81D8D0',
-    '#45B7D1', '#6DD3DA', '#FFA07A', '#FFB59A',
-    '#C9A0DC', '#D4B3E6', '#FFD166', '#FFDE8A'
+    '#FF6B6B', '#FF8E8E', '#4ECDC4', '#81D8D0', '#45B7D1', '#6DD3DA',
+    '#FFA07A', '#FFB59A', '#C9A0DC', '#D4B3E6', '#FFD166', '#FFDE8A'
 ];
 
 function generateColorExercise() {
@@ -276,7 +310,6 @@ function generateColorExercise() {
         const randomColor = colors[Math.floor(Math.random() * colors.length)];
         if (!choices.includes(randomColor)) choices.push(randomColor);
     }
-
     choices.sort(() => Math.random() - 0.5).forEach(c => {
         const d = document.createElement('div');
         d.className = 'color-choice';
@@ -290,13 +323,15 @@ function generateColorExercise() {
     });
 }
 
-// Rytm - 3 do 6 uderzeń
+// Rytm
+const rhythmState = { target: 0, user: 0 }; // Lokalny stan dla rytmu
+
 function generateRhythmExercise() {
-    appState.exerciseData.auditory.target = 3 + Math.floor(Math.random() * 4);
-    appState.exerciseData.auditory.user = 0;
+    rhythmState.target = 3 + Math.floor(Math.random() * 4);
+    rhythmState.user = 0;
     const pat = document.getElementById('rhythmPattern');
     pat.innerHTML = '';
-    for (let i = 0; i < appState.exerciseData.auditory.target; i++) {
+    for (let i = 0; i < rhythmState.target; i++) {
         pat.innerHTML += `<div class="rhythm-beat" style="width:30px;height:30px;background:#0984e3;border-radius:50%;display:inline-block;margin:5px;color:white;line-height:30px;">${i + 1}</div>`;
     }
     clearUserPattern();
@@ -317,14 +352,14 @@ function playRhythm() {
 }
 
 function addBeat() {
-    appState.exerciseData.auditory.user++;
+    rhythmState.user++;
     const uPat = document.getElementById('userPattern');
     uPat.innerHTML += '🥁 ';
     playTone(300, 'triangle', 0.1);
 
-    if (appState.exerciseData.auditory.user === appState.exerciseData.auditory.target) {
+    if (rhythmState.user === rhythmState.target) {
         setTimeout(() => checkRhythm(), 500);
-    } else if (appState.exerciseData.auditory.user > appState.exerciseData.auditory.target) {
+    } else if (rhythmState.user > rhythmState.target) {
         playTone(100, 'sawtooth', 0.5);
         uPat.innerHTML += ' ❌';
         setTimeout(clearUserPattern, 1000);
@@ -332,15 +367,15 @@ function addBeat() {
 }
 
 function clearUserPattern() {
-    appState.exerciseData.auditory.user = 0;
+    rhythmState.user = 0;
     document.getElementById('userPattern').innerHTML = '';
 }
 
 function checkRhythm() { completeExercise('auditory'); }
 
-// Rysowanie - 10 Losowych Emocji
+// Emocje
 function generateEmotionExercise() {
-    const emotions = ["Radość", "Smutek", "Złość", "Strach", "Spokój", "Zaskoczenie", "Dumę", "Zazdrość", "Ekscytację", "Zmęczenie"];
+    const emotions = ["Radość", "Smutek", "Złość", "Strach", "Spokój", "Zaskoczenie", "Dumę", "Zazdrość"];
     const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
     document.getElementById('emotionPrompt').textContent = randomEmotion;
     clearCanvas();
@@ -377,13 +412,14 @@ function clearCanvas() {
 
 function submitDrawing() { completeExercise('tactile'); }
 
-// --- 7. PULS DNIA (MODUŁ DODANY) ---
+// --- 6. PULS DNIA ---
 let pulseState = { mood: 0, tags: [] };
 
 function initPulseSystem() {
     const pulseCard = document.querySelector('.exercise-card[data-category="pulse"]');
     if (pulseCard) {
         pulseCard.addEventListener('click', () => {
+            appState.activeCategory = 'pulse';
             const now = new Date();
             document.getElementById('currentDateDisplay').textContent = now.toLocaleDateString('pl-PL');
             showScreen('pulseScreen');
@@ -439,6 +475,7 @@ async function saveDailyLog() {
 
         speakLuna("Dziękuję. Dane zostały zapisane.");
         completeExercise('pulse');
+        // Puls wraca do menu po sukcesie
         setTimeout(() => showScreen('exerciseSelection'), 2000);
 
     } catch (e) {
@@ -475,7 +512,7 @@ async function generatePDFReport() {
     doc.save('Raport_Luna.pdf');
 }
 
-// --- 8. ZAPIS I SUKCES ---
+// --- 7. SUKCES I DANE ---
 async function completeExercise(cat) {
     playTone(500, 'sine', 0.1);
     setTimeout(() => playTone(800, 'sine', 0.3), 150);
@@ -505,7 +542,7 @@ async function completeExercise(cat) {
     document.getElementById('successMessage').textContent = "+3 Punkty Rozwoju";
     document.getElementById('successModal').classList.remove('hidden');
 
-    if (cat !== 'pulse') speakLuna("Brawo! Świetna robota.");
+    if (cat !== 'pulse') speakLuna("Brawo! Kontynuujmy.");
 }
 
 async function loadDashboardData() {

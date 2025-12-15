@@ -12,18 +12,23 @@
 
 body {
     font-family: 'Inter', sans-serif;
+    background-color: var(--bg);
     color: var(--text);
     margin: 0;
     display: flex;
     justify-content: center;
     min-height: 100vh;
 
-    /* --- NOWE TŁO LUNY --- */
+    /* --- ULEPSZONE TŁO --- */
     background-image: url('tlo.png');
     background-size: cover;
-    background-position: center;
+    /* Wypełnij cały ekran */
+    background-position: center top;
+    /* Pozycjonuj od góry i środka (żeby widać było twarz) */
     background-attachment: fixed;
+    /* Tło nie przesuwa się przy przewijaniu */
     background-repeat: no-repeat;
+}
 }
 
 .container {
