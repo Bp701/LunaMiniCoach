@@ -7,6 +7,7 @@
     <title>Luna Health System</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
@@ -47,6 +48,13 @@
             </div>
 
             <div class="exercise-categories">
+                <div class="exercise-card" data-category="pulse"
+                    style="border: 2px solid #a29bfe; background: #f8f6ff;">
+                    <div class="card-icon">📅</div>
+                    <h3>PULS DNIA</h3>
+                    <p>Zanotuj nastrój</p>
+                </div>
+
                 <div class="exercise-card" data-category="visual">
                     <div class="card-icon">👁️</div>
                     <h3>STYMULACJA WZROKU</h3>
@@ -75,6 +83,57 @@
             <div class="bottom-nav">
                 <button class="btn btn--outline" id="parentDashboardBtn">Panel Analityczny (Dane)</button>
                 <button class="btn btn--secondary" id="backToWelcomeBtn">Wyloguj</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="exercise-screen hidden" id="pulseScreen">
+        <div class="container">
+            <div class="exercise-header">
+                <h2>Jak minął dzień?</h2>
+                <p id="currentDateDisplay" style="color:#7f8c8d;"></p>
+            </div>
+
+            <div class="game-area"
+                style="text-align: left; max-width: 500px; margin: 0 auto; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 15px;">
+
+                <label style="font-weight:bold; display:block; margin-bottom:10px;">Ogólny nastrój:</label>
+                <div class="mood-selector" style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                    <button class="btn-mood" data-value="1">😩</button>
+                    <button class="btn-mood" data-value="2">😟</button>
+                    <button class="btn-mood" data-value="3">😐</button>
+                    <button class="btn-mood" data-value="4">🙂</button>
+                    <button class="btn-mood" data-value="5">😁</button>
+                </div>
+
+                <label style="font-weight:bold; display:block; margin-bottom:10px;">Co się działo? (Zaznacz):</label>
+                <div class="tags-container" id="tagsContainer"
+                    style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+                    <button class="btn-tag" onclick="toggleTag(this)">Meltdown 🤯</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Problemy ze snem 🌙</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Dobra terapia 🧩</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Nowe leki 💊</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Stres w szkole 🏫</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Sukces! 🏆</button>
+                </div>
+
+                <label style="font-weight:bold; display:block; margin-bottom:10px;">Krótka notatka:</label>
+                <textarea id="pulseNote" class="form-control" rows="3"
+                    style="width:100%; max-width:100%; text-align:left;"
+                    placeholder="Np. Zasnął dopiero o 23:00..."></textarea>
+
+                <hr style="margin: 20px 0; border:0; border-top:1px solid #ddd;">
+
+                <div style="background: #e3f2fd; padding:15px; border-radius:10px; text-align:center;">
+                    <p style="margin:0 0 10px 0; font-size:0.9rem;">Generuj raport dla lekarza (ostatnie 30 dni):</p>
+                    <button class="btn btn--outline" id="generatePdfBtn" style="font-size:0.9rem;">📄 Pobierz
+                        PDF</button>
+                </div>
+            </div>
+
+            <div class="exercise-nav" style="margin-top:20px;">
+                <button class="btn btn--secondary" id="backToSelectionBtnPulse">Powrót</button>
+                <button class="btn btn--primary" id="savePulseBtn">Zapisz Dzień</button>
             </div>
         </div>
     </section>
