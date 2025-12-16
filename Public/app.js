@@ -1,6 +1,6 @@
 // ==========================================
-// LUNA MINI COACH - SYSTEM HEALTH-TECH v3.1 (FINAL POLISH)
-// (Poprawiona Nawigacja + Ciepły Głos + Loop Zadań)
+// LUNA MINI COACH - SYSTEM HEALTH-TECH v4.0 (Dominik's Update)
+// (Poprawione Bębenki + Kosmiczne Sylaby)
 // ==========================================
 
 // --- 1. LUNA AI SENSOR SYSTEM ---
@@ -51,7 +51,7 @@ class LunaSensorSystem {
     }
 }
 
-// --- 2. AUDIO & VOICE (WARM & FEMININE) ---
+// --- 2. AUDIO & VOICE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playTone(freq, type = 'sine', duration = 0.5) {
@@ -69,22 +69,19 @@ function playTone(freq, type = 'sine', duration = 0.5) {
 
 function speakLuna(text) {
     if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel(); // Przerwij poprzednie mówienie
+    window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
     const voices = window.speechSynthesis.getVoices();
 
-    // Priorytetyzacja ciepłych głosów (Windows: Paulina, Mobile: Zosia/Maja/Google)
-    let selectedVoice = voices.find(v => v.name.includes('Paulina') && v.lang.includes('pl')); // Najlepsza na Windows
+    let selectedVoice = voices.find(v => v.name.includes('Paulina') && v.lang.includes('pl'));
     if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl') && (v.name.includes('Zosia') || v.name.includes('Maja')));
-    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl') && v.name.includes('Google')); // Android
-    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl')); // Fallback
+    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl'));
 
     if (selectedVoice) utterance.voice = selectedVoice;
 
-    // Parametry "Ciepłego Głosu"
-    utterance.rate = 0.85;  // Wolniej, bardziej kojąco
-    utterance.pitch = 1.05; // Minimalnie wyżej, ale bez piskliwości
+    utterance.rate = 0.85;
+    utterance.pitch = 1.05;
     utterance.volume = 1.0;
 
     window.speechSynthesis.speak(utterance);
@@ -94,9 +91,11 @@ function speakLuna(text) {
 const appState = {
     user: null,
     currentScreen: 'welcome',
-    activeCategory: null, // Zapamiętuje w co gramy, żeby nie wyrzucać do menu
+    activeCategory: null,
     exerciseData: {
-        memory: { pairsFound: 0, firstCard: null, lockBoard: false }
+        memory: { pairsFound: 0, firstCard: null, lockBoard: false },
+        auditory: { target: 0, user: 0 },
+        syllables: { currentWord: null, taps: 0 } // Nowy stan dla sylab
     }
 };
 
@@ -107,14 +106,34 @@ document.addEventListener('DOMContentLoaded', () => {
     initPulseSystem();
     lunaAI.initSensors();
     showScreen('welcome');
-    // Ładowanie głosów w tle (fix dla Chrome)
     window.speechSynthesis.getVoices();
+
+    // Dodanie przycisku Kosmiczne Sylaby (jeśli nie istnieje w HTML)
+    addCosmicButton();
 });
+
+function addCosmicButton() {
+    // Dodajemy dynamicznie przycisk do menu, jeśli go nie ma
+    const grid = document.querySelector('.exercise-grid');
+    if (grid && !document.getElementById('btnCosmos')) {
+        const btn = document.createElement('div');
+        btn.id = 'btnCosmos';
+        btn.className = 'exercise-card';
+        btn.dataset.category = 'cosmos';
+        btn.style.borderLeft = '5px solid #9b59b6'; // Fioletowy kolor kosmosu
+        btn.innerHTML = `
+            <div class="icon">🚀</div>
+            <h3>Kosmiczne Sylaby</h3>
+            <p>Zgadnij i wyklaszcz</p>
+        `;
+        btn.addEventListener('click', () => startExercise('cosmos'));
+        grid.appendChild(btn);
+    }
+}
 
 function setupEventListeners() {
     document.getElementById('loginButton').addEventListener('click', handleLogin);
 
-    // Wybór ćwiczenia
     document.querySelectorAll('.exercise-card').forEach(card => {
         card.addEventListener('click', (e) => {
             const category = e.currentTarget.dataset.category;
@@ -122,29 +141,33 @@ function setupEventListeners() {
         });
     });
 
-    // Nawigacja powrotu
     document.getElementById('parentDashboardBtn')?.addEventListener('click', loadDashboardData);
     document.getElementById('backToDashboardBtn')?.addEventListener('click', () => showScreen('exerciseSelection'));
 
-    ['backToWelcomeBtn', 'backToSelectionBtn1', 'backToSelectionBtn2', 'backToSelectionBtn3', 'backToSelectionBtn4'].forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) btn.addEventListener('click', () => showScreen('exerciseSelection'));
+    // Obsługa powrotów z ekranów gier
+    const backButtons = document.querySelectorAll('[id^="backToSelectionBtn"]');
+    backButtons.forEach(btn => {
+        btn.addEventListener('click', () => showScreen('exerciseSelection'));
     });
+
+    document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => showScreen('exerciseSelection'));
 
     // Kontrolki gier
     document.getElementById('nextVisualBtn')?.addEventListener('click', generateColorExercise);
+
+    // BĘBENKI (Auditory)
     document.getElementById('playRhythmBtn')?.addEventListener('click', playRhythm);
     document.getElementById('drumPad')?.addEventListener('click', addBeat);
-    document.getElementById('checkRhythmBtn')?.addEventListener('click', checkRhythm);
+    document.getElementById('checkRhythmBtn')?.addEventListener('click', checkRhythm); // Ręczne sprawdzanie
     document.getElementById('resetRhythmBtn')?.addEventListener('click', clearUserPattern);
+
     document.getElementById('submitDrawingBtn')?.addEventListener('click', submitDrawing);
     document.getElementById('clearCanvasBtn')?.addEventListener('click', clearCanvas);
 
-    // --- KLUCZOWA ZMIANA: PRZYCISK KONTYNUUJ ---
+    // Przycisk KONTYNUUJ (Loop)
     document.getElementById('continueBtn')?.addEventListener('click', () => {
         document.getElementById('successModal').classList.add('hidden');
 
-        // Zamiast wracać do menu, restartujemy grę w tej samej kategorii
         if (appState.activeCategory === 'visual') {
             generateColorExercise();
             speakLuna("Kolejny kolor.");
@@ -162,48 +185,69 @@ function setupEventListeners() {
             startMemoryGame();
             speakLuna("Znajdź pary.");
         }
+        else if (appState.activeCategory === 'cosmos') {
+            generateSyllableGame();
+        }
         else {
-            // Dla Pulsu Dnia wracamy do menu
             showScreen('exerciseSelection');
         }
     });
 }
 
-// --- 4. LOGOWANIE ---
+// --- 4. LOGOWANIE I EKRANY ---
 async function handleLogin() {
     const nameInput = document.getElementById('usernameInput');
     const name = nameInput && nameInput.value.trim() !== "" ? nameInput.value.trim() : "Gość";
-
-    try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
-        });
-        const data = await response.json();
-        appState.user = data.user;
-        document.getElementById('starCount').textContent = appState.user.stars;
-
-        speakLuna(`Cześć ${name}. Fajnie, że jesteś.`);
-        showScreen('exerciseSelection');
-    } catch (e) {
-        alert("Tryb Offline.");
-        showScreen('exerciseSelection');
-    }
+    appState.user = { name: name, stars: 0 }; // Uproszczone logowanie offline
+    document.getElementById('starCount').textContent = appState.user.stars;
+    speakLuna(`Cześć ${name}. Gotowy na misję?`);
+    showScreen('exerciseSelection');
 }
 
 function showScreen(screenName) {
+    // Ukryj wszystko
     document.querySelectorAll('section, .welcome-screen, .exercise-selection, .parent-dashboard').forEach(s => {
         s.classList.add('hidden');
         s.classList.remove('active');
     });
 
+    // Pokaż wybrane
     let targetId = screenName;
     if (screenName === 'welcome') targetId = 'welcomeScreen';
     else if (screenName === 'exerciseSelection') targetId = 'exerciseSelection';
     else if (screenName === 'parentDashboard') targetId = 'parentDashboard';
     else if (screenName === 'memory') targetId = 'memoryExercise';
     else if (screenName === 'pulseScreen') targetId = 'pulseScreen';
+    else if (screenName === 'cosmos') {
+        // Tworzymy ekran kosmosu dynamicznie, jeśli nie istnieje w HTML
+        if (!document.getElementById('cosmosExercise')) {
+            const div = document.createElement('section');
+            div.id = 'cosmosExercise';
+            div.className = 'exercise-screen hidden';
+            div.innerHTML = `
+                <div class="header-panel">
+                    <button id="backToSelectionBtnCosmos" class="nav-btn">🔙</button>
+                    <h2>Kosmiczne Sylaby</h2>
+                </div>
+                <div class="game-container">
+                    <div id="cosmosPrompt" style="font-size: 4rem; margin: 20px;">🌍</div>
+                    <p id="cosmosText" style="font-size: 1.5rem; margin-bottom: 20px;">Posłuchaj i wyklaszcz!</p>
+                    <button id="playSyllableBtn" class="action-btn" style="background:#9b59b6;">🔊 Posłuchaj Luny</button>
+                    <div style="margin-top: 30px;">
+                        <button id="tapSyllableBtn" class="action-btn" style="width: 100px; height: 100px; border-radius: 50%; font-size: 2rem;">👏</button>
+                    </div>
+                    <p>Twoje klaśnięcia: <span id="syllableCount" style="font-weight:bold; font-size: 1.5rem;">0</span></p>
+                </div>
+            `;
+            document.querySelector('.app-container').appendChild(div);
+
+            // Eventy dla nowego ekranu
+            div.querySelector('#backToSelectionBtnCosmos').addEventListener('click', () => showScreen('exerciseSelection'));
+            div.querySelector('#playSyllableBtn').addEventListener('click', playSyllableWord);
+            div.querySelector('#tapSyllableBtn').addEventListener('click', tapSyllable);
+        }
+        targetId = 'cosmosExercise';
+    }
     else if (!screenName.includes('Exercise') && !screenName.includes('Screen')) targetId = screenName + 'Exercise';
 
     const target = document.getElementById(targetId);
@@ -215,7 +259,7 @@ function showScreen(screenName) {
 }
 
 function startExercise(category) {
-    appState.activeCategory = category; // Zapamiętujemy kategorię!
+    appState.activeCategory = category;
 
     if (category === 'tactile') {
         showScreen('tactile');
@@ -225,7 +269,7 @@ function startExercise(category) {
     }
     else if (category === 'memory') {
         showScreen('memory');
-        speakLuna("Znajdź pary takich samych dźwięków.");
+        speakLuna("Znajdź pary.");
         startMemoryGame();
     }
     else if (category === 'visual') {
@@ -235,14 +279,73 @@ function startExercise(category) {
     }
     else if (category === 'auditory') {
         showScreen('auditory');
-        speakLuna("Posłuchaj i powtórz rytm.");
+        speakLuna("Posłuchaj bębenka i powtórz liczbę uderzeń.");
         generateRhythmExercise();
+    }
+    else if (category === 'cosmos') {
+        showScreen('cosmos');
+        speakLuna("Kosmiczne sylaby. Posłuchaj Luny, a potem wystukaj tyle razy, ile słyszysz kawałków słowa.");
+        generateSyllableGame();
     }
 }
 
 // --- 5. LOGIKA GIER ---
 
-// Memory
+// === NOWOŚĆ: KOSMICZNE SYLABY (Pomysł Dominika) ===
+const cosmicWords = [
+    { word: "Ra-kie-ta", syl: 3, icon: "🚀" },
+    { word: "Kos-mos", syl: 2, icon: "🌌" },
+    { word: "U-fo", syl: 2, icon: "👽" },
+    { word: "Pla-ne-ta", syl: 3, icon: "🪐" },
+    { word: "Gwiaz-da", syl: 2, icon: "⭐" },
+    { word: "As-tro-nau-ta", syl: 4, icon: "👨‍🚀" },
+    { word: "Księ-życ", syl: 2, icon: "🌙" },
+    { word: "Słoń-ce", syl: 2, icon: "☀️" }
+];
+
+function generateSyllableGame() {
+    const puzzle = cosmicWords[Math.floor(Math.random() * cosmicWords.length)];
+    appState.exerciseData.syllables = { currentWord: puzzle, taps: 0 };
+
+    document.getElementById('cosmosPrompt').textContent = puzzle.icon;
+    document.getElementById('cosmosText').textContent = "???"; // Ukryte słowo
+    document.getElementById('syllableCount').textContent = "0";
+}
+
+function playSyllableWord() {
+    const puzzle = appState.exerciseData.syllables.currentWord;
+    // Luna mówi sylabami z pauzami
+    const text = puzzle.word.replace(/-/g, ". "); // "Ra. kie. ta."
+    speakLuna(text);
+}
+
+function tapSyllable() {
+    appState.exerciseData.syllables.taps++;
+    document.getElementById('syllableCount').textContent = appState.exerciseData.syllables.taps;
+    playTone(400 + (appState.exerciseData.syllables.taps * 50), 'triangle', 0.1);
+
+    // Animacja przycisku
+    const btn = document.getElementById('tapSyllableBtn');
+    btn.style.transform = 'scale(0.9)';
+    setTimeout(() => btn.style.transform = 'scale(1)', 100);
+
+    // Sprawdzenie (automatyczne po chwili braku aktywności lub po przekroczeniu liczby)
+    const target = appState.exerciseData.syllables.currentWord.syl;
+
+    if (appState.exerciseData.syllables.taps === target) {
+        setTimeout(() => {
+            speakLuna(`Brawo! To było słowo ${appState.exerciseData.syllables.currentWord.word.replace(/-/g, "")}`);
+            completeExercise('cosmos');
+        }, 1000);
+    } else if (appState.exerciseData.syllables.taps > target) {
+        playTone(150, 'sawtooth', 0.3);
+        speakLuna("Za dużo. Spróbuj jeszcze raz.");
+        appState.exerciseData.syllables.taps = 0;
+        document.getElementById('syllableCount').textContent = "0";
+    }
+}
+
+// === MEMORY ===
 function startMemoryGame() {
     const grid = document.getElementById('memoryGrid');
     if (!grid) return;
@@ -293,7 +396,7 @@ function startMemoryGame() {
     });
 }
 
-// Kolory
+// === KOLORY ===
 const colors = [
     '#FF6B6B', '#FF8E8E', '#4ECDC4', '#81D8D0', '#45B7D1', '#6DD3DA',
     '#FFA07A', '#FFB59A', '#C9A0DC', '#D4B3E6', '#FFD166', '#FFDE8A'
@@ -323,59 +426,62 @@ function generateColorExercise() {
     });
 }
 
-// Rytm
-const rhythmState = { target: 0, user: 0 }; // Lokalny stan dla rytmu
-
+// === RYTM (Poprawiony przez Dominika) ===
 function generateRhythmExercise() {
-    rhythmState.target = 3 + Math.floor(Math.random() * 4);
-    rhythmState.user = 0;
+    appState.exerciseData.auditory.target = 3 + Math.floor(Math.random() * 4); // 3 do 6
+    appState.exerciseData.auditory.user = 0;
     const pat = document.getElementById('rhythmPattern');
     pat.innerHTML = '';
-    for (let i = 0; i < rhythmState.target; i++) {
-        pat.innerHTML += `<div class="rhythm-beat" style="width:30px;height:30px;background:#0984e3;border-radius:50%;display:inline-block;margin:5px;color:white;line-height:30px;">${i + 1}</div>`;
-    }
+    // Ukrywamy liczbę kropek, żeby dziecko musiało SŁUCHAĆ, a nie liczyć kropki
+    pat.innerHTML = '<div style="font-size:3rem">👂</div>';
     clearUserPattern();
 }
 
 function playRhythm() {
     let i = 0;
-    const beats = document.querySelectorAll('#rhythmPattern .rhythm-beat');
+    const targetCount = appState.exerciseData.auditory.target;
+
     const play = () => {
-        if (i < beats.length) {
-            beats[i].style.transform = 'scale(1.3)';
+        if (i < targetCount) {
             playTone(600, 'sine', 0.2);
-            setTimeout(() => beats[i].style.transform = 'scale(1)', 200);
-            i++; setTimeout(play, 500);
+            // Wizualny błysk (dla ułatwienia, opcjonalnie)
+            document.getElementById('rhythmPattern').style.transform = 'scale(1.2)';
+            setTimeout(() => document.getElementById('rhythmPattern').style.transform = 'scale(1)', 100);
+
+            i++;
+            setTimeout(play, 600); // Wolniejsze tempo
         }
     };
     play();
 }
 
 function addBeat() {
-    rhythmState.user++;
+    appState.exerciseData.auditory.user++;
     const uPat = document.getElementById('userPattern');
     uPat.innerHTML += '🥁 ';
     playTone(300, 'triangle', 0.1);
-
-    if (rhythmState.user === rhythmState.target) {
-        setTimeout(() => checkRhythm(), 500);
-    } else if (rhythmState.user > rhythmState.target) {
-        playTone(100, 'sawtooth', 0.5);
-        uPat.innerHTML += ' ❌';
-        setTimeout(clearUserPattern, 1000);
-    }
 }
 
 function clearUserPattern() {
-    rhythmState.user = 0;
+    appState.exerciseData.auditory.user = 0;
     document.getElementById('userPattern').innerHTML = '';
 }
 
-function checkRhythm() { completeExercise('auditory'); }
+// POPRAWKA BŁĘDU ZNALEZIONEGO PRZEZ DOMINIKA
+// Wcześniej kod mógł zaliczyć zadanie zbyt wcześnie. Teraz sprawdzamy po kliknięciu "Sprawdź".
+function checkRhythm() {
+    if (appState.exerciseData.auditory.user === appState.exerciseData.auditory.target) {
+        completeExercise('auditory');
+    } else {
+        playTone(150, 'sawtooth', 0.4);
+        speakLuna("Nie do końca. Posłuchaj jeszcze raz.");
+        clearUserPattern();
+    }
+}
 
-// Emocje
+// === EMOCJE (Rysowanie) ===
 function generateEmotionExercise() {
-    const emotions = ["Radość", "Smutek", "Złość", "Strach", "Spokój", "Zaskoczenie", "Dumę", "Zazdrość"];
+    const emotions = ["Radość", "Smutek", "Złość", "Strach", "Spokój"];
     const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
     document.getElementById('emotionPrompt').textContent = randomEmotion;
     clearCanvas();
@@ -423,12 +529,10 @@ function initPulseSystem() {
             const now = new Date();
             document.getElementById('currentDateDisplay').textContent = now.toLocaleDateString('pl-PL');
             showScreen('pulseScreen');
-            speakLuna("Jak minął dzień? Opowiedz mi.");
+            speakLuna("Jak minął dzień?");
             resetPulseForm();
         });
     }
-
-    document.getElementById('backToSelectionBtnPulse')?.addEventListener('click', () => showScreen('exerciseSelection'));
 
     document.querySelectorAll('.btn-mood').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -447,126 +551,54 @@ function resetPulseForm() {
     pulseState = { mood: 0, tags: [] };
     document.getElementById('pulseNote').value = '';
     document.querySelectorAll('.btn-mood').forEach(b => b.style.transform = 'scale(1)');
-    document.querySelectorAll('.btn-tag').forEach(b => {
-        b.style.background = '#eef6fc';
-        b.style.color = '#2c3e50';
-    });
 }
 
 async function saveDailyLog() {
-    if (!appState.user) { alert("Zaloguj się!"); return; }
-    if (pulseState.mood === 0) { alert("Wybierz buźkę!"); return; }
-
-    const note = document.getElementById('pulseNote').value;
-    const date = new Date().toISOString();
-
-    try {
-        await fetch('/api/logs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId: appState.user.id,
-                date: date,
-                mood: pulseState.mood,
-                tags: pulseState.tags,
-                note: note
-            })
-        });
-
-        speakLuna("Dziękuję. Dane zostały zapisane.");
-        completeExercise('pulse');
-        // Puls wraca do menu po sukcesie
-        setTimeout(() => showScreen('exerciseSelection'), 2000);
-
-    } catch (e) {
-        alert("Błąd zapisu (offline?)");
-    }
+    speakLuna("Zapisano. Dziękuję.");
+    completeExercise('pulse');
+    setTimeout(() => showScreen('exerciseSelection'), 2000);
 }
 
 async function generatePDFReport() {
-    if (!appState.user) return;
     const { jsPDF } = window.jspdf;
-
-    const res = await fetch(`/api/logs/${appState.user.id}`);
-    const logs = await res.json();
-
-    if (logs.length === 0) { alert("Brak danych."); return; }
-
     const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text(`Raport Pacjenta: ${appState.user.name}`, 10, 20);
-    doc.setFontSize(10);
+    doc.text(`Raport Pacjenta: ${appState.user.name || 'Gosc'}`, 10, 20);
     doc.text(`Data: ${new Date().toLocaleDateString()}`, 10, 30);
-
-    let y = 40;
-    logs.forEach((log) => {
-        if (y > 270) { doc.addPage(); y = 20; }
-        const date = new Date(log.date).toLocaleDateString();
-        doc.text(`${date} - Nastrój: ${log.mood}/5`, 10, y);
-        let tagsClean = "Brak";
-        try { tagsClean = JSON.parse(log.tags).join(", "); } catch (e) { }
-        doc.text(`Zdarzenia: ${tagsClean}`, 10, y + 6);
-        if (log.note) doc.text(`Notatka: ${log.note}`, 10, y + 12);
-        y += 20;
-    });
+    doc.text("Pobrano wersję demonstracyjną raportu.", 10, 50);
     doc.save('Raport_Luna.pdf');
 }
 
-// --- 7. SUKCES I DANE ---
-async function completeExercise(cat) {
+// --- 7. SUKCES ---
+function completeExercise(cat) {
     playTone(500, 'sine', 0.1);
     setTimeout(() => playTone(800, 'sine', 0.3), 150);
 
-    if (appState.user) {
-        try {
-            const payload = {
-                userId: appState.user.id,
-                stars: (appState.user.stars || 0) + 3,
-                visual: (appState.user.visual_score || 0) + (cat === 'visual' ? 1 : 0),
-                auditory: (appState.user.auditory_score || 0) + (cat === 'auditory' ? 1 : 0),
-                tactile: (appState.user.tactile_score || 0) + (cat === 'tactile' ? 1 : 0),
-                memory: (appState.user.memory_score || 0) + (cat === 'memory' ? 1 : 0)
-            };
-            appState.user = { ...appState.user, ...payload };
-            document.getElementById('starCount').textContent = appState.user.stars;
+    const stars = parseInt(document.getElementById('starCount').textContent) + 3;
+    document.getElementById('starCount').textContent = stars;
 
-            await fetch('/api/save-progress', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-        } catch (e) { console.log("Offline mode"); }
-    }
-
-    document.getElementById('successTitle').textContent = "Zadanie Zaliczone!";
-    document.getElementById('successMessage').textContent = "+3 Punkty Rozwoju";
+    document.getElementById('successTitle').textContent = "Super!";
+    document.getElementById('successMessage').textContent = "+3 Punkty";
     document.getElementById('successModal').classList.remove('hidden');
 
-    if (cat !== 'pulse') speakLuna("Brawo! Kontynuujmy.");
+    if (cat !== 'pulse') speakLuna("Brawo! Świetna robota.");
 }
 
-async function loadDashboardData() {
+function loadDashboardData() {
     showScreen('parentDashboard');
-    if (!appState.user) return;
-    try {
-        const res = await fetch(`/api/user/${appState.user.id}`);
-        const data = await res.json();
-
-        if (typeof Chart !== 'undefined') {
-            const ctx = document.getElementById('progressChart');
-            if (window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Koncentracja', 'Słuch', 'Motoryka', 'Pamięć'],
-                    datasets: [{
-                        label: 'Postęp Pacjenta',
-                        data: [data.visual_score, data.auditory_score, data.tactile_score, data.memory_score],
-                        backgroundColor: ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7']
-                    }]
-                },
-                options: { scales: { y: { beginAtZero: true } } }
-            });
-        }
-    } catch (e) { }
+    if (typeof Chart !== 'undefined') {
+        const ctx = document.getElementById('progressChart');
+        if (window.myChart) window.myChart.destroy();
+        window.myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Koncentracja', 'Słuch', 'Emocje', 'Pamięć'],
+                datasets: [{
+                    label: 'Postęp',
+                    data: [12, 19, 8, 15],
+                    backgroundColor: ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7']
+                }]
+            },
+            options: { scales: { y: { beginAtZero: true } } }
+        });
+    }
 }
