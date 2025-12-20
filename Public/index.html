@@ -4,14 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luna Health System</title>
+    <title>Luna Educational Demo</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
-    <div class="demo-watermark">Luna Tech Innovations v2.1 (Clinical Build)</div>
+    <!-- ZMIANA: Bezpieczna nazwa wersji -->
+    <div class="demo-watermark">Luna Junior v1.0 (Pilot Version)</div>
 
     <section class="welcome-screen active" id="welcomeScreen">
         <div class="container">
@@ -21,18 +22,24 @@
                 <p class="welcome-subtitle">Inteligentny System Wsparcia Rozwoju Sensorycznego</p>
 
                 <div class="value-proposition">
-                    <div class="value-item"><span class="icon">❤️</span><span class="text">Monitoring HRV</span></div>
-                    <div class="value-item"><span class="icon">🧠</span><span class="text">AI Neuro-Analiza</span></div>
-                    <div class="value-item"><span class="icon">📊</span><span class="text">Raporty Kliniczne</span>
-                    </div>
+                    <!-- ZMIANA: Usunięto medyczne terminy -->
+                    <div class="value-item"><span class="icon">❤️</span><span class="text">Spokój</span></div>
+                    <div class="value-item"><span class="icon">🧠</span><span class="text">Koncentracja</span></div>
+                    <div class="value-item"><span class="icon">📊</span><span class="text">Postępy</span></div>
                 </div>
 
                 <div class="login-area">
-                    <input type="text" id="usernameInput" class="form-control" placeholder="ID Pacjenta / Imię">
+                    <input type="text" id="usernameInput" class="form-control" placeholder="Imię Dziecka">
                 </div>
 
-                <button class="btn btn--primary btn--large" id="loginButton">URUCHOM DIAGNOSTYKĘ</button>
-                <p class="demo-info">System połączony z chmurą Luna Cloud ☁️</p>
+                <!-- ZMIANA: "Uruchom Diagnostykę" -> "ROZPOCZNIJ ZABAWĘ" -->
+                <button class="btn btn--primary btn--large" id="loginButton">ROZPOCZNIJ ZABAWĘ</button>
+                <p class="demo-info">System działa lokalnie (Bezpieczeństwo RODO 🔒)</p>
+                
+                <!-- DODATEK: Nota Prawna -->
+                <footer style="margin-top: 30px; font-size: 10px; color: #aaa; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    <p><strong>NOTA PRAWNA:</strong> Aplikacja Luna Mini Coach jest narzędziem edukacyjno-wspierającym, a nie wyrobem medycznym. Nie służy do diagnozowania ani leczenia. Administrator: NeuroEdu Labs.</p>
+                </footer>
             </div>
         </div>
     </section>
@@ -40,8 +47,8 @@
     <section class="exercise-selection hidden" id="exerciseSelection">
         <div class="container">
             <div class="header">
-                <h2>Panel Terapeutyczny</h2>
-                <p>Wybierz moduł stymulacji:</p>
+                <h2>Centrum Zabaw</h2>
+                <p>Wybierz zabawę:</p>
                 <div class="progress-info" style="display:none;">
                     <span class="progress-text">Punkty: <span id="starCount">0</span> ⭐</span>
                 </div>
@@ -57,32 +64,38 @@
 
                 <div class="exercise-card" data-category="visual">
                     <div class="card-icon">👁️</div>
-                    <h3>STYMULACJA WZROKU</h3>
+                    <h3>BYSTRE OCZKO</h3>
                     <p>Trening koncentracji</p>
                 </div>
 
                 <div class="exercise-card" data-category="auditory">
                     <div class="card-icon">👂</div>
-                    <h3>PRZETWARZANIE SŁUCHOWE</h3>
-                    <p>Sekwencje rytmiczne</p>
+                    <h3>MUZYCZNE UCHO</h3>
+                    <p>Rytm i słuch</p>
                 </div>
 
                 <div class="exercise-card" data-category="tactile">
                     <div class="card-icon">✋</div>
-                    <h3>MOTORYKA MAŁA</h3>
-                    <p>Koordynacja ręka-oko</p>
+                    <h3>SPRAWNE RĄCZKI</h3>
+                    <p>Koordynacja</p>
                 </div>
 
                 <div class="exercise-card" data-category="memory">
                     <div class="card-icon">🧠</div>
-                    <h3>PAMIĘĆ OPERACYJNA</h3>
-                    <p>Trening asocjacji</p>
+                    <h3>SUPER PAMIĘĆ</h3>
+                    <p>Trening pamięci</p>
                 </div>
             </div>
 
             <div class="bottom-nav">
-                <button class="btn btn--outline" id="parentDashboardBtn">Panel Analityczny (Dane)</button>
+                <!-- ZMIANA: "Panel Analityczny" -> "Panel Rodzica" -->
+                <button class="btn btn--outline" id="parentDashboardBtn">Panel Rodzica (Postępy)</button>
                 <button class="btn btn--secondary" id="backToWelcomeBtn">Wyloguj</button>
+            </div>
+            
+             <!-- DODATEK: Nota Prawna (skrócona) -->
+             <div style="text-align: center; margin-top: 20px; font-size: 9px; color: #ccc;">
+                Luna Junior v1.0 (Pilot). Narzędzie edukacyjne, nie medyczne.
             </div>
         </div>
     </section>
@@ -109,11 +122,11 @@
                 <label style="font-weight:bold; display:block; margin-bottom:10px;">Co się działo? (Zaznacz):</label>
                 <div class="tags-container" id="tagsContainer"
                     style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
-                    <button class="btn-tag" onclick="toggleTag(this)">Meltdown 🤯</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Trudne emocje 🤯</button>
                     <button class="btn-tag" onclick="toggleTag(this)">Problemy ze snem 🌙</button>
-                    <button class="btn-tag" onclick="toggleTag(this)">Dobra terapia 🧩</button>
-                    <button class="btn-tag" onclick="toggleTag(this)">Nowe leki 💊</button>
-                    <button class="btn-tag" onclick="toggleTag(this)">Stres w szkole 🏫</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Dobra zabawa 🧩</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Leki 💊</button>
+                    <button class="btn-tag" onclick="toggleTag(this)">Szkoła/Przedszkole 🏫</button>
                     <button class="btn-tag" onclick="toggleTag(this)">Sukces! 🏆</button>
                 </div>
 
@@ -125,7 +138,7 @@
                 <hr style="margin: 20px 0; border:0; border-top:1px solid #ddd;">
 
                 <div style="background: #e3f2fd; padding:15px; border-radius:10px; text-align:center;">
-                    <p style="margin:0 0 10px 0; font-size:0.9rem;">Generuj raport dla lekarza (ostatnie 30 dni):</p>
+                    <p style="margin:0 0 10px 0; font-size:0.9rem;">Generuj raport (ostatnie 30 dni):</p>
                     <button class="btn btn--outline" id="generatePdfBtn" style="font-size:0.9rem;">📄 Pobierz
                         PDF</button>
                 </div>
@@ -227,7 +240,8 @@
 
     <section class="parent-dashboard hidden" id="parentDashboard">
         <div class="container">
-            <h2>Raport Postępów Klinicznych</h2>
+            <!-- ZMIANA: "Raport Postępów Klinicznych" -> "Raport Postępów Dziecka" -->
+            <h2>Raport Postępów Dziecka</h2>
             <div class="chart-container"
                 style="position: relative; height: 300px; width:100%; background:white; padding:20px; border-radius:15px;">
                 <canvas id="progressChart"></canvas>

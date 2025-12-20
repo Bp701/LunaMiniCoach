@@ -1,14 +1,14 @@
 // ==========================================
-// LUNA MINI COACH - SYSTEM HEALTH-TECH v4.0 (Dominik's Update)
-// (Poprawione Bębenki + Kosmiczne Sylaby)
+// LUNA JUNIOR - PILOT VERSION v1.0
+// (Wersja Edukacyjna - Bezpieczna)
 // ==========================================
 
-// --- 1. LUNA AI SENSOR SYSTEM ---
+// --- 1. LUNA SENSOR SYSTEM (Pilot) ---
 class LunaSensorSystem {
     constructor() {
         this.shakeThreshold = 45;
         this.lastShake = 0;
-        console.log('🧠 Luna AI: System sensorów gotowy');
+        console.log('🧠 Luna Pilot: System sensorów gotowy');
     }
 
     initSensors() {
@@ -45,7 +45,8 @@ class LunaSensorSystem {
             box-shadow: 0 8px 20px rgba(0,0,0,0.3); z-index: 9999; animation: fadeOut 4s forwards; 
             pointer-events: none;
         `;
-        effect.innerHTML = "🧸 WSPARCIE EMOCJONALNE AKTYWNE";
+        // ZMIANA: Mniej medyczny komunikat
+        effect.innerHTML = "🧸 TRYB WSPARCIA AKTYWNY";
         document.body.appendChild(effect);
         setTimeout(() => effect.remove(), 4000);
     }
@@ -95,7 +96,7 @@ const appState = {
     exerciseData: {
         memory: { pairsFound: 0, firstCard: null, lockBoard: false },
         auditory: { target: 0, user: 0 },
-        syllables: { currentWord: null, taps: 0 } // Nowy stan dla sylab
+        syllables: { currentWord: null, taps: 0 }
     }
 };
 
@@ -108,21 +109,21 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('welcome');
     window.speechSynthesis.getVoices();
 
-    // Dodanie przycisku Kosmiczne Sylaby (jeśli nie istnieje w HTML)
     addCosmicButton();
 });
 
 function addCosmicButton() {
     // Dodajemy dynamicznie przycisk do menu, jeśli go nie ma
-    const grid = document.querySelector('.exercise-grid');
+    // UWAGA: Dostosowano selektor do nowej struktury HTML (exercise-categories)
+    const grid = document.querySelector('.exercise-categories');
     if (grid && !document.getElementById('btnCosmos')) {
         const btn = document.createElement('div');
         btn.id = 'btnCosmos';
         btn.className = 'exercise-card';
         btn.dataset.category = 'cosmos';
-        btn.style.borderLeft = '5px solid #9b59b6'; // Fioletowy kolor kosmosu
+        btn.style.borderLeft = '5px solid #9b59b6';
         btn.innerHTML = `
-            <div class="icon">🚀</div>
+            <div class="card-icon">🚀</div>
             <h3>Kosmiczne Sylaby</h3>
             <p>Zgadnij i wyklaszcz</p>
         `;
@@ -144,27 +145,24 @@ function setupEventListeners() {
     document.getElementById('parentDashboardBtn')?.addEventListener('click', loadDashboardData);
     document.getElementById('backToDashboardBtn')?.addEventListener('click', () => showScreen('exerciseSelection'));
 
-    // Obsługa powrotów z ekranów gier
     const backButtons = document.querySelectorAll('[id^="backToSelectionBtn"]');
     backButtons.forEach(btn => {
         btn.addEventListener('click', () => showScreen('exerciseSelection'));
     });
 
-    document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => showScreen('exerciseSelection'));
+    document.getElementById('backToWelcomeBtn')?.addEventListener('click', () => showScreen('welcome'));
 
     // Kontrolki gier
     document.getElementById('nextVisualBtn')?.addEventListener('click', generateColorExercise);
 
-    // BĘBENKI (Auditory)
     document.getElementById('playRhythmBtn')?.addEventListener('click', playRhythm);
     document.getElementById('drumPad')?.addEventListener('click', addBeat);
-    document.getElementById('checkRhythmBtn')?.addEventListener('click', checkRhythm); // Ręczne sprawdzanie
+    document.getElementById('checkRhythmBtn')?.addEventListener('click', checkRhythm);
     document.getElementById('resetRhythmBtn')?.addEventListener('click', clearUserPattern);
 
     document.getElementById('submitDrawingBtn')?.addEventListener('click', submitDrawing);
     document.getElementById('clearCanvasBtn')?.addEventListener('click', clearCanvas);
 
-    // Przycisk KONTYNUUJ (Loop)
     document.getElementById('continueBtn')?.addEventListener('click', () => {
         document.getElementById('successModal').classList.add('hidden');
 
@@ -198,20 +196,19 @@ function setupEventListeners() {
 async function handleLogin() {
     const nameInput = document.getElementById('usernameInput');
     const name = nameInput && nameInput.value.trim() !== "" ? nameInput.value.trim() : "Gość";
-    appState.user = { name: name, stars: 0 }; // Uproszczone logowanie offline
+    appState.user = { name: name, stars: 0 };
     document.getElementById('starCount').textContent = appState.user.stars;
-    speakLuna(`Cześć ${name}. Gotowy na misję?`);
+    // ZMIANA: Bardziej zabawowy komunikat
+    speakLuna(`Cześć ${name}. Zaczynamy zabawę!`);
     showScreen('exerciseSelection');
 }
 
 function showScreen(screenName) {
-    // Ukryj wszystko
     document.querySelectorAll('section, .welcome-screen, .exercise-selection, .parent-dashboard').forEach(s => {
         s.classList.add('hidden');
         s.classList.remove('active');
     });
 
-    // Pokaż wybrane
     let targetId = screenName;
     if (screenName === 'welcome') targetId = 'welcomeScreen';
     else if (screenName === 'exerciseSelection') targetId = 'exerciseSelection';
@@ -219,29 +216,30 @@ function showScreen(screenName) {
     else if (screenName === 'memory') targetId = 'memoryExercise';
     else if (screenName === 'pulseScreen') targetId = 'pulseScreen';
     else if (screenName === 'cosmos') {
-        // Tworzymy ekran kosmosu dynamicznie, jeśli nie istnieje w HTML
         if (!document.getElementById('cosmosExercise')) {
             const div = document.createElement('section');
             div.id = 'cosmosExercise';
             div.className = 'exercise-screen hidden';
             div.innerHTML = `
-                <div class="header-panel">
-                    <button id="backToSelectionBtnCosmos" class="nav-btn">🔙</button>
-                    <h2>Kosmiczne Sylaby</h2>
-                </div>
-                <div class="game-container">
-                    <div id="cosmosPrompt" style="font-size: 4rem; margin: 20px;">🌍</div>
-                    <p id="cosmosText" style="font-size: 1.5rem; margin-bottom: 20px;">Posłuchaj i wyklaszcz!</p>
-                    <button id="playSyllableBtn" class="action-btn" style="background:#9b59b6;">🔊 Posłuchaj Luny</button>
-                    <div style="margin-top: 30px;">
-                        <button id="tapSyllableBtn" class="action-btn" style="width: 100px; height: 100px; border-radius: 50%; font-size: 2rem;">👏</button>
+                <div class="container">
+                    <div class="exercise-header">
+                        <h2>Kosmiczne Sylaby</h2>
+                        <button id="backToSelectionBtnCosmos" class="btn btn--secondary">Powrót</button>
                     </div>
-                    <p>Twoje klaśnięcia: <span id="syllableCount" style="font-weight:bold; font-size: 1.5rem;">0</span></p>
+                    <div class="game-area" style="text-align:center;">
+                        <div id="cosmosPrompt" style="font-size: 4rem; margin: 20px;">🌍</div>
+                        <p id="cosmosText" style="font-size: 1.5rem; margin-bottom: 20px;">Posłuchaj i wyklaszcz!</p>
+                        <button id="playSyllableBtn" class="btn btn--primary" style="background:#9b59b6;">🔊 Posłuchaj Luny</button>
+                        <div style="margin-top: 30px;">
+                            <button id="tapSyllableBtn" style="width: 100px; height: 100px; border-radius: 50%; font-size: 2rem; background:white; border:2px solid #ddd; cursor:pointer;">👏</button>
+                        </div>
+                        <p>Twoje klaśnięcia: <span id="syllableCount" style="font-weight:bold; font-size: 1.5rem;">0</span></p>
+                    </div>
                 </div>
             `;
-            document.querySelector('.app-container').appendChild(div);
+            // ZMIANA: Dodajemy do body, bezpieczniej przy prostej strukturze
+            document.body.appendChild(div);
 
-            // Eventy dla nowego ekranu
             div.querySelector('#backToSelectionBtnCosmos').addEventListener('click', () => showScreen('exerciseSelection'));
             div.querySelector('#playSyllableBtn').addEventListener('click', playSyllableWord);
             div.querySelector('#tapSyllableBtn').addEventListener('click', tapSyllable);
@@ -291,7 +289,6 @@ function startExercise(category) {
 
 // --- 5. LOGIKA GIER ---
 
-// === NOWOŚĆ: KOSMICZNE SYLABY (Pomysł Dominika) ===
 const cosmicWords = [
     { word: "Ra-kie-ta", syl: 3, icon: "🚀" },
     { word: "Kos-mos", syl: 2, icon: "🌌" },
@@ -308,14 +305,13 @@ function generateSyllableGame() {
     appState.exerciseData.syllables = { currentWord: puzzle, taps: 0 };
 
     document.getElementById('cosmosPrompt').textContent = puzzle.icon;
-    document.getElementById('cosmosText').textContent = "???"; // Ukryte słowo
+    document.getElementById('cosmosText').textContent = "???";
     document.getElementById('syllableCount').textContent = "0";
 }
 
 function playSyllableWord() {
     const puzzle = appState.exerciseData.syllables.currentWord;
-    // Luna mówi sylabami z pauzami
-    const text = puzzle.word.replace(/-/g, ". "); // "Ra. kie. ta."
+    const text = puzzle.word.replace(/-/g, ". ");
     speakLuna(text);
 }
 
@@ -324,12 +320,10 @@ function tapSyllable() {
     document.getElementById('syllableCount').textContent = appState.exerciseData.syllables.taps;
     playTone(400 + (appState.exerciseData.syllables.taps * 50), 'triangle', 0.1);
 
-    // Animacja przycisku
     const btn = document.getElementById('tapSyllableBtn');
     btn.style.transform = 'scale(0.9)';
     setTimeout(() => btn.style.transform = 'scale(1)', 100);
 
-    // Sprawdzenie (automatyczne po chwili braku aktywności lub po przekroczeniu liczby)
     const target = appState.exerciseData.syllables.currentWord.syl;
 
     if (appState.exerciseData.syllables.taps === target) {
@@ -426,13 +420,11 @@ function generateColorExercise() {
     });
 }
 
-// === RYTM (Poprawiony przez Dominika) ===
+// === RYTM ===
 function generateRhythmExercise() {
     appState.exerciseData.auditory.target = 3 + Math.floor(Math.random() * 4); // 3 do 6
     appState.exerciseData.auditory.user = 0;
     const pat = document.getElementById('rhythmPattern');
-    pat.innerHTML = '';
-    // Ukrywamy liczbę kropek, żeby dziecko musiało SŁUCHAĆ, a nie liczyć kropki
     pat.innerHTML = '<div style="font-size:3rem">👂</div>';
     clearUserPattern();
 }
@@ -444,12 +436,11 @@ function playRhythm() {
     const play = () => {
         if (i < targetCount) {
             playTone(600, 'sine', 0.2);
-            // Wizualny błysk (dla ułatwienia, opcjonalnie)
             document.getElementById('rhythmPattern').style.transform = 'scale(1.2)';
             setTimeout(() => document.getElementById('rhythmPattern').style.transform = 'scale(1)', 100);
 
             i++;
-            setTimeout(play, 600); // Wolniejsze tempo
+            setTimeout(play, 600);
         }
     };
     play();
@@ -467,8 +458,6 @@ function clearUserPattern() {
     document.getElementById('userPattern').innerHTML = '';
 }
 
-// POPRAWKA BŁĘDU ZNALEZIONEGO PRZEZ DOMINIKA
-// Wcześniej kod mógł zaliczyć zadanie zbyt wcześnie. Teraz sprawdzamy po kliknięciu "Sprawdź".
 function checkRhythm() {
     if (appState.exerciseData.auditory.user === appState.exerciseData.auditory.target) {
         completeExercise('auditory');
@@ -479,7 +468,7 @@ function checkRhythm() {
     }
 }
 
-// === EMOCJE (Rysowanie) ===
+// === EMOCJE ===
 function generateEmotionExercise() {
     const emotions = ["Radość", "Smutek", "Złość", "Strach", "Spokój"];
     const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
@@ -562,10 +551,12 @@ async function saveDailyLog() {
 async function generatePDFReport() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.text(`Raport Pacjenta: ${appState.user.name || 'Gosc'}`, 10, 20);
+    // ZMIANA: Z "Raport Pacjenta" na "Raport Dziecka" - BEZPIECZNE DLA MDR
+    doc.text(`Raport Dziecka: ${appState.user.name || 'Gosc'}`, 10, 20);
     doc.text(`Data: ${new Date().toLocaleDateString()}`, 10, 30);
-    doc.text("Pobrano wersję demonstracyjną raportu.", 10, 50);
-    doc.save('Raport_Luna.pdf');
+    // ZMIANA: Z "Raport Kliniczny" na "Wersja Demonstracyjna"
+    doc.text("Pobrano wersję demonstracyjną (Pilot).", 10, 50);
+    doc.save('Raport_Luna_Pilot.pdf');
 }
 
 // --- 7. SUKCES ---
