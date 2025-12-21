@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luna Educational Demo</title>
+    <title>Luna Educational Pilot</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="[https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap)" rel="stylesheet">
+    <script src="[https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js](https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js)"></script>
 </head>
 
 <body>
-    <!-- ZMIANA: Bezpieczna nazwa wersji -->
-    <div class="demo-watermark">Luna Junior v1.0 (Pilot Version)</div>
+    <!-- WERSJA PILOTAŻOWA - BEZPIECZNA NAZWA -->
+    <div class="demo-watermark">Luna Junior v1.0 (Educational Pilot)</div>
 
     <section class="welcome-screen active" id="welcomeScreen">
         <div class="container">
@@ -22,7 +22,7 @@
                 <p class="welcome-subtitle">Inteligentny System Wsparcia Rozwoju Sensorycznego</p>
 
                 <div class="value-proposition">
-                    <!-- ZMIANA: Usunięto medyczne terminy -->
+                    <!-- NARRACJA WELLNESS -->
                     <div class="value-item"><span class="icon">❤️</span><span class="text">Spokój</span></div>
                     <div class="value-item"><span class="icon">🧠</span><span class="text">Koncentracja</span></div>
                     <div class="value-item"><span class="icon">📊</span><span class="text">Postępy</span></div>
@@ -32,13 +32,12 @@
                     <input type="text" id="usernameInput" class="form-control" placeholder="Imię Dziecka">
                 </div>
 
-                <!-- ZMIANA: "Uruchom Diagnostykę" -> "ROZPOCZNIJ ZABAWĘ" -->
                 <button class="btn btn--primary btn--large" id="loginButton">ROZPOCZNIJ ZABAWĘ</button>
                 <p class="demo-info">System działa lokalnie (Bezpieczeństwo RODO 🔒)</p>
                 
-                <!-- DODATEK: Nota Prawna -->
+                <!-- NOWA NOTA PRAWNA (BEZPIECZNA - WELLNESS) -->
                 <footer style="margin-top: 30px; font-size: 10px; color: #aaa; max-width: 600px; margin-left: auto; margin-right: auto;">
-                    <p><strong>NOTA PRAWNA:</strong> Aplikacja Luna Mini Coach jest narzędziem edukacyjno-wspierającym, a nie wyrobem medycznym. Nie służy do diagnozowania ani leczenia. Administrator: NeuroEdu Labs.</p>
+                    <p><strong>NOTA PRAWNA:</strong> Aplikacja Luna Mini Coach jest narzędziem edukacyjnym wspierającym samoregulację i rozwój (wellness), a nie wyrobem medycznym. Nie służy do diagnozowania ani leczenia. Wszelkie decyzje terapeutyczne należą do specjalisty. Administrator: NeuroEdu Labs.</p>
                 </footer>
             </div>
         </div>
@@ -88,14 +87,12 @@
             </div>
 
             <div class="bottom-nav">
-                <!-- ZMIANA: "Panel Analityczny" -> "Panel Rodzica" -->
                 <button class="btn btn--outline" id="parentDashboardBtn">Panel Rodzica (Postępy)</button>
                 <button class="btn btn--secondary" id="backToWelcomeBtn">Wyloguj</button>
             </div>
             
-             <!-- DODATEK: Nota Prawna (skrócona) -->
              <div style="text-align: center; margin-top: 20px; font-size: 9px; color: #ccc;">
-                Luna Junior v1.0 (Pilot). Narzędzie edukacyjne, nie medyczne.
+                Luna Junior v1.0 (Pilot). Narzędzie edukacyjne.
             </div>
         </div>
     </section>
@@ -125,7 +122,10 @@
                     <button class="btn-tag" onclick="toggleTag(this)">Trudne emocje 🤯</button>
                     <button class="btn-tag" onclick="toggleTag(this)">Problemy ze snem 🌙</button>
                     <button class="btn-tag" onclick="toggleTag(this)">Dobra zabawa 🧩</button>
-                    <button class="btn-tag" onclick="toggleTag(this)">Leki 💊</button>
+                    
+                    <!-- ZMIANA KLUCZOWA: "LEKI" -> "ZDROWIE" -->
+                    <button class="btn-tag" onclick="toggleTag(this)">Zdrowie 💊</button>
+                    
                     <button class="btn-tag" onclick="toggleTag(this)">Szkoła/Przedszkole 🏫</button>
                     <button class="btn-tag" onclick="toggleTag(this)">Sukces! 🏆</button>
                 </div>
@@ -151,115 +151,64 @@
         </div>
     </section>
 
+    <!-- POZOSTAŁE SEKCJE (Visual, Auditory, etc.) POZOSTAJĄ BEZ ZMIAN W V1 -->
     <section class="exercise-screen hidden" id="visualExercise">
         <div class="container">
-            <div class="exercise-header">
-                <h2>Znajdź taki sam kolor!</h2>
-            </div>
+            <div class="exercise-header"><h2>Znajdź taki sam kolor!</h2></div>
             <div class="game-area">
-                <div class="target-area">
-                    <p>Wzorzec:</p>
-                    <div class="target-color" id="targetColor"
-                        style="width:100px; height:100px; margin:0 auto; border-radius:15px; border:4px solid #333;">
-                    </div>
-                </div>
-                <div class="choices-area">
-                    <p>Wybierz pasujący:</p>
-                    <div class="color-choices" id="colorChoices"
-                        style="display:flex; justify-content:center; flex-wrap:wrap; gap:10px;"></div>
-                </div>
+                <div class="target-area"><p>Wzorzec:</p><div class="target-color" id="targetColor" style="width:100px; height:100px; margin:0 auto; border-radius:15px; border:4px solid #333;"></div></div>
+                <div class="choices-area"><p>Wybierz pasujący:</p><div class="color-choices" id="colorChoices" style="display:flex; justify-content:center; flex-wrap:wrap; gap:10px;"></div></div>
             </div>
             <div class="feedback-area" id="visualFeedback"></div>
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn1">Powrót</button>
-                <button class="btn btn--primary" id="nextVisualBtn">Następny</button>
-            </div>
+            <div class="exercise-nav"><button class="btn btn--secondary" id="backToSelectionBtn1">Powrót</button><button class="btn btn--primary" id="nextVisualBtn">Następny</button></div>
         </div>
     </section>
 
     <section class="exercise-screen hidden" id="auditoryExercise">
         <div class="container">
-            <div class="exercise-header">
-                <h2>Powtórz rytm!</h2>
-            </div>
+            <div class="exercise-header"><h2>Powtórz rytm!</h2></div>
             <div class="game-area">
-                <div class="rhythm-display">
-                    <p>Sekwencja:</p>
-                    <div class="rhythm-pattern" id="rhythmPattern"></div>
-                    <button class="btn btn--primary" id="playRhythmBtn">▶️ Odtwórz</button>
-                </div>
-                <div class="rhythm-input">
-                    <p>Twoja kolej:</p>
-                    <div class="drum-pad" id="drumPad" style="font-size:4rem; cursor:pointer;">🥁</div>
-                    <button class="btn btn--outline btn--sm" id="resetRhythmBtn">↺ Reset</button>
-                    <div class="user-pattern" id="userPattern"></div>
-                </div>
+                <div class="rhythm-display"><p>Sekwencja:</p><div class="rhythm-pattern" id="rhythmPattern"></div><button class="btn btn--primary" id="playRhythmBtn">▶️ Odtwórz</button></div>
+                <div class="rhythm-input"><p>Twoja kolej:</p><div class="drum-pad" id="drumPad" style="font-size:4rem; cursor:pointer;">🥁</div><button class="btn btn--outline btn--sm" id="resetRhythmBtn">↺ Reset</button><div class="user-pattern" id="userPattern"></div></div>
             </div>
             <div class="feedback-area" id="auditoryFeedback"></div>
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn2">Powrót</button>
-                <button class="btn btn--primary" id="checkRhythmBtn">Sprawdź</button>
-            </div>
+            <div class="exercise-nav"><button class="btn btn--secondary" id="backToSelectionBtn2">Powrót</button><button class="btn btn--primary" id="checkRhythmBtn">Sprawdź</button></div>
         </div>
     </section>
 
     <section class="exercise-screen hidden" id="tactileExercise">
         <div class="container">
-            <div class="exercise-header">
-                <h2>Ekspresja Emocjonalna</h2>
-                <p>Narysuj: <span id="emotionPrompt" style="font-weight:bold;">Radość</span></p>
-            </div>
-            <div class="game-area" style="position:relative;">
-                <canvas id="drawingCanvas"></canvas>
-            </div>
-            <div class="drawing-tools">
-                <button class="btn btn--outline" id="clearCanvasBtn">Wyczyść</button>
-                <button class="btn btn--primary" id="submitDrawingBtn">Zapisz</button>
-            </div>
+            <div class="exercise-header"><h2>Ekspresja Emocjonalna</h2><p>Narysuj: <span id="emotionPrompt" style="font-weight:bold;">Radość</span></p></div>
+            <div class="game-area" style="position:relative;"><canvas id="drawingCanvas"></canvas></div>
+            <div class="drawing-tools"><button class="btn btn--outline" id="clearCanvasBtn">Wyczyść</button><button class="btn btn--primary" id="submitDrawingBtn">Zapisz</button></div>
             <div class="feedback-area" id="tactileFeedback"></div>
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn3">Powrót</button>
-            </div>
+            <div class="exercise-nav"><button class="btn btn--secondary" id="backToSelectionBtn3">Powrót</button></div>
         </div>
     </section>
 
     <section class="exercise-screen hidden" id="memoryExercise">
         <div class="container">
-            <div class="exercise-header">
-                <h2>Memory Dźwiękowe</h2>
-                <p>Pary: <span id="memoryPairsFound">0</span>/4</p>
-            </div>
-            <div class="game-area">
-                <div class="memory-grid" id="memoryGrid"></div>
-            </div>
-            <div class="exercise-nav">
-                <button class="btn btn--secondary" id="backToSelectionBtn4">Powrót</button>
-            </div>
+            <div class="exercise-header"><h2>Memory Dźwiękowe</h2><p>Pary: <span id="memoryPairsFound">0</span>/4</p></div>
+            <div class="game-area"><div class="memory-grid" id="memoryGrid"></div></div>
+            <div class="exercise-nav"><button class="btn btn--secondary" id="backToSelectionBtn4">Powrót</button></div>
         </div>
     </section>
 
     <section class="parent-dashboard hidden" id="parentDashboard">
         <div class="container">
-            <!-- ZMIANA: "Raport Postępów Klinicznych" -> "Raport Postępów Dziecka" -->
             <h2>Raport Postępów Dziecka</h2>
-            <div class="chart-container"
-                style="position: relative; height: 300px; width:100%; background:white; padding:20px; border-radius:15px;">
-                <canvas id="progressChart"></canvas>
-            </div>
+            <div class="chart-container" style="position: relative; height: 300px; width:100%; background:white; padding:20px; border-radius:15px;"><canvas id="progressChart"></canvas></div>
             <button class="btn btn--secondary" id="backToDashboardBtn" style="margin-top:20px;">Powrót</button>
         </div>
     </section>
 
     <div class="modal hidden" id="successModal">
         <div class="modal-content">
-            <h3 id="successTitle">Sesja Zakończona</h3>
-            <p id="successMessage">Dane zapisane w systemie.</p>
-            <button class="btn btn--primary" id="continueBtn">Kontynuuj</button>
+            <h3 id="successTitle">Sesja Zakończona</h3><p id="successMessage">Dane zapisane w systemie.</p><button class="btn btn--primary" id="continueBtn">Kontynuuj</button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="[https://cdn.jsdelivr.net/npm/chart.js](https://cdn.jsdelivr.net/npm/chart.js)"></script>
     <script src="app.js"></script>
 </body>
-
 </html>
