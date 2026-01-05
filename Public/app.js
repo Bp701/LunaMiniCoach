@@ -70,19 +70,29 @@ function playTone(freq, type = 'sine', duration = 0.5) {
 
 function speakLuna(text) {
     if (!window.speechSynthesis) return;
+
+    // 1. Zawsze kasujemy poprzednie kolejki, żeby głosy się nie nakładały
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
 
-    let selectedVoice = voices.find(v => v.name.includes('Paulina') && v.lang.includes('pl'));
-    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl') && (v.name.includes('Zosia') || v.name.includes('Maja')));
-    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.includes('pl'));
+    // 2. KLUCZ: Wymuszamy język polski (to naprawia błędy fonetyczne)
+    utterance.lang = 'pl-PL';
 
-    if (selectedVoice) utterance.voice = selectedVoice;
+    // 3. Pobieramy głosy dostępne w przeglądarce użytkownika
+    let voices = window.speechSynthesis.getVoices();
 
-    utterance.rate = 0.85;
-    utterance.pitch = 1.05;
+    // 4. Szukamy najlepszego polskiego głosu (Maja, Paulina lub jakikolwiek polski)
+    let selectedVoice = voices.find(v => v.lang.startsWith('pl') && (v.name.includes('Maja') || v.name.includes('Paulina')));
+    if (!selectedVoice) selectedVoice = voices.find(v => v.lang.startsWith('pl'));
+
+    if (selectedVoice) {
+        utterance.voice = selectedVoice;
+    }
+
+    // 5. Ustawienia barwy i tempa (dostosowane do dzieci SPE)
+    utterance.rate = 0.85; // Nieco wolniej dla lepszej zrozumiałości
+    utterance.pitch = 1.0;  // Naturalna wysokość głosu
     utterance.volume = 1.0;
 
     window.speechSynthesis.speak(utterance);
